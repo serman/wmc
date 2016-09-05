@@ -1,0 +1,4 @@
+ofxCv
+ofxIpVideoGrabber
+ofxOsc
+ofxXmlSettings

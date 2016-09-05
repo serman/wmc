@@ -1,0 +1,23 @@
+<streams>
+	<stream url="http://192.168.10.108/axis-cgi/mjpg/video.cgi?channel=0&subtype=0"/>
+	<stream url="http://192.168.10.108/axis-cgi/mjpg/video.cgi?channel=0&subtype=1"/>
+	<!--<stream url="rtsp://192.168.1.108:554/cam/realmonitor?channel=1&subtype=0"/>-->
+	<!--<<stream url="http://212.170.22.153:8080/mjpg/video.mjpg"/> -->
+</streams>
+
+<file> /Users/sergiogalan/temporalborrar/snapshot2.jpg </file>
+<useLocalVideo> 1 </useLocalVideo>
+<videoName> video2.mp4 </videoName>
+<serialPort> -1 </serialPort>
+<headless> 0 </headless>
+<logLevel> 1 </logLevel>
+
+<!-- enum ofLogLevel{
+	OF_LOG_VERBOSE,
+	OF_LOG_NOTICE,
+	OF_LOG_WARNING,
+	OF_LOG_ERROR,
+	OF_LOG_FATAL_ERROR,
+	OF_LOG_SILEN
+ };
+ ->
