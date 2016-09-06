@@ -39,6 +39,8 @@
 /* TIME_BETWEEN_DETECTIONS defines the minimun time betwen API QUERYS **/
 #define NETWORK_TIMEOUT 3000
 
+#define NCURSES
+
 // La camara con el zoom a tope va de -15 a 15
 
 
@@ -51,11 +53,9 @@
     #define NUM_ROWS 1
     #define NUM_COLS 1
 #endif
-#define NCURSES
 
-#ifdef NCURSES
+
 #include "ofxNcurses.h"
-#endif
 
 class detectionData
 {
@@ -157,13 +157,13 @@ public:
     void sendImage();
     void getContour();
     
+    //std::stringstream infoStream;
     
 /***** NCURSES CODE ***/
-    #ifdef NCURSES
     void setupNC();
     void updateNC();
-    void drawNC();
-#endif
+    void drawNC(stringstream &stream1);
+
     /*******/
     ofxOscSender sender;
     long lastTimeFaceDetectedAndSentToAPI=0;

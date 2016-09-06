@@ -1,0 +1,154 @@
+
+
+--------------------------------------- 2016-09-06-13-28-31-355
+[verbose] ---------------Loading Streams---------------
+[verbose] STREAM LOADED:  url: http://192.168.10.108/axis-cgi/mjpg/video.cgi?channel=0subtype=0 username:  password:  auth: 0
+[verbose] STREAM LOADED:  url: http://192.168.10.108/axis-cgi/mjpg/video.cgi?channel=0subtype=1 username:  password:  auth: 0
+[verbose] filename: /Users/sergiogalan/temporalborrar/snapshot2.jpg
+[verbose] -----------Loading Streams Complete----------
+[warning] ofAVFoundationPlayer: load(): error when creating texture cache, -6661.
+[notice ] ofSerial: [0] = cu.Bluetooth-Incoming-Port
+[notice ] ofSerial: [1] = tty.Bluetooth-Incoming-Port
+[notice ] ofSerial: [2] = cu.Bluetooth-Modem
+[notice ] ofSerial: [3] = tty.Bluetooth-Modem
+[notice ] ofSerial: [4] = cu.iPhonedeSergio-Wireless
+[notice ] ofSerial: [5] = tty.iPhonedeSergio-Wireless
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 60
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 0
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] logverbose 2  frameRAte: 60
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 0
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+[verbose] Draw End-2147483648
+
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 0
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 1
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] logverbose 2  frameRAte: 0
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 1
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+[verbose] Draw End-2147483648
+
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 1.00075
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 2
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] Draw End-2147483648
+
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 1.00036
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 3
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] Draw End-2147483648
+
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 0.996184
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 4
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] logverbose 2  frameRAte: 0.996184
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 4
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+[verbose] Draw End-2147483648
+
+[notice ]  videoPlayer inside-2147483648
+
+[verbose] personas0 ___ Caras: 0: 
+[notice ] DRAW NCURSE 1  frameRAte: 1.00278
+  current video frame: -inf
+  path video2.mp4
+  playing 0
+  loaded 0x7fcd6043a840
+  frame num 5
+   isUsingTexture 0
+   isUsingTexture 2583
+  Status: HIBERN
+
+
+[notice ] DRAW NCURSE 2-2147483648
+
+[verbose] Draw End-2147483648
+
+[verbose] ofSignalHandler: Hangup: 1

@@ -8,14 +8,17 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
+    ofLogToFile(ofToDataPath("log.txt",true) );
+    ofSetLogLevel(OF_LOG_VERBOSE);
+
     fileName="";
 
-    ofSetFrameRate(30);
+    ofSetFrameRate(1);
     sender.setup(HOST, PORT);
     loadCameras();
     
     ofSetLogLevel(logLevel);
-    
+    ofSetLogLevel(OF_LOG_VERBOSE);
     int serverRecvPort = 12000;
     string dst="localhost";
     myosc.setup(serverRecvPort);
@@ -53,10 +56,14 @@ void ofApp::setup()
         ratioH=1024.0/videoHeight;
         
     }else{
+        videoPlayer.setUseTexture(false) ;
+
         videoPlayer.load(videoName);
-        videoPlayer.setLoopState(OF_LOOP_NORMAL);
+        //videoPlayer.setLoopState(OF_LOOP_NORMAL);
         videoPlayer.play();
-        videoPlayer.setLoopState(OF_LOOP_NORMAL);
+        //videoPlayer.setLoopState(OF_LOOP_NORMAL);
+        videoPlayer.getPlayer()->getTotalNumFrames();
+        
         ratioW=1;
         ratioH=1;
     }
@@ -87,9 +94,11 @@ void ofApp::setup()
     if(serialPort>=0){
         serial.setup(serialPort, 9600);
     }
+
     
     if(HEADLESS){
         setupNC();
+        videoPlayer.setUseTexture(false) ;
     }
 }
 
@@ -170,6 +179,10 @@ void ofApp::loadCameras()
         videoName= XML.getValue("videoName","abierto.mp4");
         serialPort= XML.getValue("serialPort",-1);
         HEADLESS= XML.getValue("headless",0);
+        
+#ifdef NCURSES
+        HEADLESS=1;
+#endif
         logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
         
         ofLog(OF_LOG_VERBOSE, "filename: " + fileName);
@@ -194,9 +207,9 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
         if(sender == &grabbers[i])
         {
             std::stringstream ss;
-            ss << "videoResized: ";
-            ss << "Camera connected to: " << grabbers[i]->getURI() + " ";
-            ss << "New DIM = " << arg.width << "/" << arg.height;
+            ss<< "videoResized: ";
+            ss<< "Camera connected to: " << grabbers[i]->getURI() + " ";
+            ss<< "New DIM = " << arg.width << "/" << arg.height;
             ofLogVerbose("ofApp") << ss.str();
         }
     }
@@ -207,6 +220,9 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 //------------------------------------------------------------------------------
 void ofApp::update()
 {
+    //ofLogNotice() << "uupdate init" << ofGetFrameNum() <<endl;
+    
+    
     // update the cameras
     if(status==HIBERN &&  ( (ofGetElapsedTimeMillis()/1000) - timeHibernStarted > 5 ) ){
         status=FINDING;
@@ -218,12 +234,6 @@ void ofApp::update()
     /*** ACTUALIZACION DE IMAGENES DE CAMARA ***/
     if(useLocalVideo==false){
         grabbers[faceTrackingGrabber]->update();
-        
-        //grabFrame.resize(640,480);
-/*        grabFrame.setFromPixels(grabbers[faceTrackingGrabber]->getPixels(),
-                                grabbers[faceTrackingGrabber]->getWidth(),
-                                grabbers[faceTrackingGrabber]->getHeight(),
-                               OF_IMAGE_COLOR); */
 
         grabberMat = toCv(grabbers[faceTrackingGrabber]->getPixels());
       //  grabbers[faceTrackingGrabber]->getPixel
@@ -232,13 +242,15 @@ void ofApp::update()
         
     }else{
         videoPlayer.update();
+        ofLogNotice() << " videoPlayer inside" << videoPlayer.getCurrentFrame() <<endl;
         if(videoPlayer.isFrameNew() ){
+            ofLogNotice() << " videoPlayer FrameNew" << videoPlayer.getCurrentFrame() <<endl;
+
             //unsigned char * pixels ;
             //pixels = videoPlayer.getPixels();
             //grabFrame.setFromPixels(pixels, videoWidth,videoHeight, OF_IMAGE_COLOR);
             grabberMat = toCv(videoPlayer.getPixels());
             toOf(grabberMat,grabFrame.getPixels());
-
             grabFrame.update();
         }
     }
@@ -273,7 +285,7 @@ void ofApp::update()
             //cv::Mat tmpMat;
             imgMat2.copyTo(tmpMat);
             // https://github.com/kylemcdonald/ofxCv/issues/163
-            // Sin este copyTo una submatriz (ya que al usar roi no se copian pixels) no se copiar’a correctamente
+            // Sin este copyTo una submatriz (ya que al usar roi no se copian pixels) no se copiar’a correctamente y se ve raro.
             }
         }
         
@@ -289,68 +301,80 @@ void ofApp::update()
     if(status!=SHOOTING){
         updateServoPosition();
     }
+    //ofLogNotice() << "uupdate END " << ofGetFrameNum() <<endl;
     
 }
 
 //------------------------------------------------------------------------------
 void ofApp::draw(){
-    
+    videoPlayer.play();
+    std::stringstream infoStream;
+    //cout << "Draw init" << videoPlayer.getCurrentFrame() << endl;
+                    //ofLogNotice() << "Drive" <<endl;
     if(!HEADLESS){
         drawGraphic();
     }
     else{
-        int f=round( ofGetFrameRate());
-        if(f<1) f=1;
+        int f=round( ofGetFrameRate()); if(f<1) f=1;
         if(ofGetFrameNum()%f==0){
-            ofLogNotice("personas" + ofToString(finder.size()) + " ___ Caras: " + ofToString(faceFinder.size()));
+            ofLogVerbose("personas" + ofToString(finder.size()) + " ___ Caras: " + ofToString(faceFinder.size()));
         }
     }
     
-    std::stringstream ss;
+
 
     if(useLocalVideo==false){
-        
         ofSetHexColor(0xffffff);
         float kbps = grabbers[faceTrackingGrabber]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         float fps = grabbers[faceTrackingGrabber]->getFrameRate();
         
         // ofToString formatting available in 0072+
-        ss << "          NAME: " << grabbers[faceTrackingGrabber]->getCameraName() << endl;
-        ss << "          HOST: " << grabbers[faceTrackingGrabber]->getHost() << endl;
-        ss << "           FPS: " << ofToString(fps,  2) << endl;
-        ss << "          Kb/S: " << ofToString(kbps, 2) << endl;
-        ss << " #Bytes Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumBytesReceived(),  0) << endl;
-        ss << "#Frames Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumFramesReceived(), 0) << endl;
-        ss << "Width: " << ofToString(grabbers[faceTrackingGrabber]->getWidth()) << endl;
-        ss << "Height: " << ofToString(grabbers[faceTrackingGrabber]->getHeight()) << endl;
-        ss << "Auto Reconnect: " << (grabbers[faceTrackingGrabber]->getAutoReconnect() ? "YES" : "NO") << endl;
-        ss << " Needs Connect: " << (grabbers[faceTrackingGrabber]->getNeedsReconnect() ? "YES" : "NO") << endl;
-        ss << "Time Till Next: " << grabbers[faceTrackingGrabber]->getTimeTillNextAutoRetry() << " ms" << endl;
-        ss << "Num Reconnects: " << ofToString(grabbers[faceTrackingGrabber]->getReconnectCount()) << endl;
-        ss << "Max Reconnects: " << ofToString(grabbers[faceTrackingGrabber]->getMaxReconnects()) << endl;
-        ss << "  Connect Fail: " << (grabbers[faceTrackingGrabber]->hasConnectionFailed() ? "YES" : "NO");
-        ss << "  frameRAte: " << ofToString(ofGetFrameRate() ) << endl;
+        infoStream<< "          NAME: " << grabbers[faceTrackingGrabber]->getCameraName() << endl;
+        infoStream<< "          HOST: " << grabbers[faceTrackingGrabber]->getHost() << endl;
+        infoStream<< "           FPS: " << ofToString(fps,  2) << endl;
+        infoStream<< "          Kb/S: " << ofToString(kbps, 2) << endl;
+        infoStream<< " #Bytes Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumBytesReceived(),  0) << endl;
+        infoStream<< "#Frames Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumFramesReceived(), 0) << endl;
+        infoStream<< "Width: " << ofToString(grabbers[faceTrackingGrabber]->getWidth()) << endl;
+        infoStream<< "Height: " << ofToString(grabbers[faceTrackingGrabber]->getHeight()) << endl;
+        infoStream<< "Auto Reconnect: " << (grabbers[faceTrackingGrabber]->getAutoReconnect() ? "YES" : "NO") << endl;
+        infoStream<< " Needs Connect: " << (grabbers[faceTrackingGrabber]->getNeedsReconnect() ? "YES" : "NO") << endl;
+        infoStream<< "Time Till Next: " << grabbers[faceTrackingGrabber]->getTimeTillNextAutoRetry() << " ms" << endl;
+        infoStream<< "Num Reconnects: " << ofToString(grabbers[faceTrackingGrabber]->getReconnectCount()) << endl;
+        infoStream<< "Max Reconnects: " << ofToString(grabbers[faceTrackingGrabber]->getMaxReconnects()) << endl;
+        infoStream<< "  Connect Fail: " << (grabbers[faceTrackingGrabber]->hasConnectionFailed() ? "YES" : "NO");
+        infoStream<< "  frameRAte: " << ofToString(ofGetFrameRate() ) << endl;
         
     }
     else{
-        ss << "  frameRAte: " << ofToString(ofGetFrameRate() ) << endl;
+        infoStream<< "  frameRAte: " << ofToString( ofGetFrameRate() ) << endl;
+        infoStream<< "  current video frame: " << videoPlayer.getPosition() <<endl;
+        infoStream<< "  path " << videoPlayer.getMoviePath() <<endl;
+                infoStream<< "  playing " << videoPlayer.isPlaying() <<endl;
+                        infoStream<< "  loaded " << videoPlayer.getPlayer() <<endl;
+        infoStream<< "  frame num " << ofGetFrameNum() <<endl;
+                infoStream<< "   isUsingTexture " << videoPlayer.isUsingTexture() <<endl;
+                infoStream<< "   isUsingTexture " << videoPlayer.getTotalNumFrames() <<endl;
     }
-    switch(status){
-        case 0:         ss << "  Status: HIBERN" << endl; break;
-        case 1:         ss << "  Status: SHOOTING" << endl; break;
-        case 2:         ss << "  Status: FINDING" << endl; break;
-        case 3:         ss << "  Status: WAITING RESPONSE" << endl; break;
     
+    switch(status){
+        case 0:         infoStream<< "  Status: HIBERN" << endl; break;
+        case 1:         infoStream<< "  Status: SHOOTING" << endl; break;
+        case 2:         infoStream<< "  Status: FINDING" << endl; break;
+        case 3:         infoStream<< "  Status: WAITING RESPONSE" << endl; break;
     }
+    
+    
     if(!HEADLESS){
-        ofDrawBitmapString(ss.str(), 10, 10+12);
+        ofDrawBitmapString(infoStream.str(), 10, 10+12);
         drawDetection();
     }
     else{
+        drawNC(infoStream);
         int f=round( ofGetFrameRate()*4);
         if(f<1) f=1;
         if(ofGetFrameNum()%f==0){
-            ofLogNotice(ss.str());
+            ofLogVerbose() << "logverbose 2" << infoStream.str();
         }
     }
     
@@ -360,6 +384,7 @@ void ofApp::draw(){
         status=HIBERN; //TODO mover esto al update
         timeHibernStarted=ofGetElapsedTimeMillis()/1000;
     }
+    ofLogVerbose() << "Draw End" << videoPlayer.getCurrentFrame() << endl;
 }
 
 void ofApp::drawGraphic(){
@@ -444,11 +469,11 @@ void ofApp::drawDetection(){
                             detections[i].position.y/ratioH,
                             detections[i].position.width/ratioW,
                             detections[i].position.height/ratioH);
-            ss << "  beard " << ofToString(detections[i].beard ) << endl;
-            ss << "  age "  << ofToString(detections[i].age ) << endl;
-            ss << "  glasses " << ofToString(detections[i].glasses ) << endl;
-            ss << "  gender " << ofToString(detections[i].gender ) << endl;
-            ss << "  smile " << ofToString(detections[i].smile ) << endl;
+            ss<< "  beard " << ofToString(detections[i].beard ) << endl;
+            ss<< "  age "  << ofToString(detections[i].age ) << endl;
+            ss<< "  glasses " << ofToString(detections[i].glasses ) << endl;
+            ss<< "  gender " << ofToString(detections[i].gender ) << endl;
+            ss<< "  smile " << ofToString(detections[i].smile ) << endl;
             ofDrawBitmapString(ss.str(), detections[i].position.x-90,detections[i].position.y );
         }
     }

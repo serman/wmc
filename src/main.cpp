@@ -28,7 +28,6 @@
 
 #ifdef NCURSES
 #include "ofAppConsoleCurses.h"
-#include "ofxNcurses.h"
 #endif
 
 int main()
@@ -36,7 +35,8 @@ int main()
 #ifdef NCURSES
     ofAppConsoleCurses window;
     ofSetupOpenGL(&window,1280,720,OF_WINDOW);
-#endif
-	ofSetupOpenGL(1280,720,OF_WINDOW);
+#else
+    ofSetupOpenGL(1280,720,OF_WINDOW);
+#endif	
 	ofRunApp(new ofApp());
 }
