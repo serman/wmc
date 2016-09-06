@@ -102,101 +102,6 @@ void ofApp::setup()
     }
 }
 
-//------------------------------------------------------------------------------
-IPCameraDef& ofApp::getNextCamera()
-{
-    nextCamera = (nextCamera + 1) % ipcams.size();
-    return ipcams[nextCamera];
-}
-
-//------------------------------------------------------------------------------
-void ofApp::loadCameras()
-{
-    
-    // all of these cameras were found using this google query
-    // http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
-    // some of the cameras below may no longer be valid.
-    
-    // to define a camera with a username / password
-    //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
-
-	ofLog(OF_LOG_VERBOSE, "---------------Loading Streams---------------");
-
-	ofxXmlSettings XML;
-    
-	if(XML.loadFile("streams.xml"))
-    {
-        XML.pushTag("streams");
-        std::string tag = "stream";
-        
-        std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
-        
-        for (std::size_t n = 0; n < nCams; ++n)
-        {
-            std::string username = XML.getAttribute(tag, "username", "", n);
-            std::string password = XML.getAttribute(tag, "password", "", n);
-            
-            std::string auth = XML.getAttribute(tag, "auth-type", "NONE", n);
-            
-            IPCameraDef::AuthType authType = IPCameraDef::AuthType::NONE;
-            
-            if (auth.compare("NONE") == 0)
-            {
-                authType = IPCameraDef::AuthType::NONE;
-            }
-            else if (auth.compare("BASIC") == 0)
-            {
-                authType = IPCameraDef::AuthType::BASIC;
-            }
-            else if (auth.compare("COOKIE") == 0)
-            {
-                authType = IPCameraDef::AuthType::COOKIE;
-            }
-            
-            IPCameraDef def(XML.getAttribute(tag, "name", "", n),
-                            XML.getAttribute(tag, "url", "", n),
-                            username,
-                            password,
-                            authType);
-            
-            
-            std::string logMessage = "STREAM LOADED: " + def.getName() +
-            " url: " +  def.getURL() +
-            " username: " + def.getUsername() +
-            " password: " + def.getPassword() +
-            " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
-            
-            ofLogVerbose() << logMessage;
-            
-            ipcams.push_back(def);
-		}
-		
-		XML.popTag();
-        
-        fileName = XML.getValue("file","");
-        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
-        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
-        videoName= XML.getValue("videoName","abierto.mp4");
-        serialPort= XML.getValue("serialPort",-1);
-        HEADLESS= XML.getValue("headless",0);
-        
-#ifdef NCURSES
-        HEADLESS=1;
-#endif
-        logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
-        
-        ofLog(OF_LOG_VERBOSE, "filename: " + fileName);
-
-	}
-    else
-    {
-		ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
-	}
-    
-	ofLog(OF_LOG_VERBOSE, "-----------Loading Streams Complete----------");
-    
-    nextCamera = ipcams.size();
-}
 
 //------------------------------------------------------------------------------
 void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
@@ -333,8 +238,8 @@ void ofApp::draw(){
         infoStream<< "          HOST: " << grabbers[faceTrackingGrabber]->getHost() << endl;
         infoStream<< "           FPS: " << ofToString(fps,  2) << endl;
         infoStream<< "          Kb/S: " << ofToString(kbps, 2) << endl;
-        infoStream<< " #Bytes Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumBytesReceived(),  0) << endl;
-        infoStream<< "#Frames Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumFramesReceived(), 0) << endl;
+     //   infoStream<< " #Bytes Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumBytesReceived(),  0) << endl;
+      //  infoStream<< "#Frames Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumFramesReceived(), 0) << endl;
         infoStream<< "Width: " << ofToString(grabbers[faceTrackingGrabber]->getWidth()) << endl;
         infoStream<< "Height: " << ofToString(grabbers[faceTrackingGrabber]->getHeight()) << endl;
         infoStream<< "Auto Reconnect: " << (grabbers[faceTrackingGrabber]->getAutoReconnect() ? "YES" : "NO") << endl;
@@ -363,6 +268,7 @@ void ofApp::draw(){
         case 2:         infoStream<< "  Status: FINDING" << endl; break;
         case 3:         infoStream<< "  Status: WAITING RESPONSE" << endl; break;
     }
+    infoStream << "personas" << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
     
     
     if(!HEADLESS){
@@ -616,4 +522,100 @@ void ofApp::updateServoPosition(){
      print(chr(int(-posFaceX/resolucion*2*aperturaCamara-aperturaCamara+125)), "x:", str(posFaceX))
      arduinoSerial.write(val)
      */
+}
+
+//------------------------------------------------------------------------------
+IPCameraDef& ofApp::getNextCamera()
+{
+    nextCamera = (nextCamera + 1) % ipcams.size();
+    return ipcams[nextCamera];
+}
+
+//------------------------------------------------------------------------------
+void ofApp::loadCameras()
+{
+    
+    // all of these cameras were found using this google query
+    // http://www.google.com/search?q=inurl%3A%22axis-cgi%2Fmjpg%22
+    // some of the cameras below may no longer be valid.
+    
+    // to define a camera with a username / password
+    //ipcams.push_back(IPCameraDef("http://148.61.142.228/axis-cgi/mjpg/video.cgi", "username", "password"));
+    
+    ofLog(OF_LOG_VERBOSE, "---------------Loading Streams---------------");
+    
+    ofxXmlSettings XML;
+    
+    if(XML.loadFile("streams.xml"))
+    {
+        XML.pushTag("streams");
+        std::string tag = "stream";
+        
+        std::size_t nCams = static_cast<std::size_t>(XML.getNumTags(tag));
+        
+        for (std::size_t n = 0; n < nCams; ++n)
+        {
+            std::string username = XML.getAttribute(tag, "username", "", n);
+            std::string password = XML.getAttribute(tag, "password", "", n);
+            
+            std::string auth = XML.getAttribute(tag, "auth-type", "NONE", n);
+            
+            IPCameraDef::AuthType authType = IPCameraDef::AuthType::NONE;
+            
+            if (auth.compare("NONE") == 0)
+            {
+                authType = IPCameraDef::AuthType::NONE;
+            }
+            else if (auth.compare("BASIC") == 0)
+            {
+                authType = IPCameraDef::AuthType::BASIC;
+            }
+            else if (auth.compare("COOKIE") == 0)
+            {
+                authType = IPCameraDef::AuthType::COOKIE;
+            }
+            
+            IPCameraDef def(XML.getAttribute(tag, "name", "", n),
+                            XML.getAttribute(tag, "url", "", n),
+                            username,
+                            password,
+                            authType);
+            
+            
+            std::string logMessage = "STREAM LOADED: " + def.getName() +
+            " url: " +  def.getURL() +
+            " username: " + def.getUsername() +
+            " password: " + def.getPassword() +
+            " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
+            
+            ofLogVerbose() << logMessage;
+            
+            ipcams.push_back(def);
+        }
+        
+        XML.popTag();
+        
+        fileName = XML.getValue("file","");
+        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
+        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
+        videoName= XML.getValue("videoName","abierto.mp4");
+        serialPort= XML.getValue("serialPort",-1);
+        HEADLESS= XML.getValue("headless",0);
+        
+#ifdef NCURSES
+        HEADLESS=1;
+#endif
+        logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
+        
+        ofLog(OF_LOG_VERBOSE, "filename: " + fileName);
+        
+    }
+    else
+    {
+        ofLog(OF_LOG_ERROR, "Unable to load streams.xml.");
+    }
+    
+    ofLog(OF_LOG_VERBOSE, "-----------Loading Streams Complete----------");
+    
+    nextCamera = ipcams.size();
 }
