@@ -13,7 +13,7 @@ void ofApp::setup()
 
     fileName="";
 
-    ofSetFrameRate(1);
+    ofSetFrameRate(8);
     sender.setup(HOST, PORT);
     loadCameras();
     
@@ -56,8 +56,6 @@ void ofApp::setup()
         ratioH=1024.0/videoHeight;
         
     }else{
-        videoPlayer.setUseTexture(false) ;
-
         videoPlayer.load(videoName);
         //videoPlayer.setLoopState(OF_LOOP_NORMAL);
         videoPlayer.play();
@@ -94,11 +92,10 @@ void ofApp::setup()
     if(serialPort>=0){
         serial.setup(serialPort, 9600);
     }
-
     
     if(HEADLESS){
+        ofLogNotice() << "HEADLESS";
         setupNC();
-        videoPlayer.setUseTexture(false) ;
     }
 }
 
@@ -206,13 +203,23 @@ void ofApp::update()
     if(status!=SHOOTING){
         updateServoPosition();
     }
-    //ofLogNotice() << "uupdate END " << ofGetFrameNum() <<endl;
+    ofLogNotice() << "videoplayergetposition " << videoPlayer.getPosition() <<endl;
+        std::stringstream infoStream;
+    infoStream<< "  frameRAte: " << ofToString( ofGetFrameRate() ) << endl;
+    infoStream<< "  current video frame: " << videoPlayer.getPosition() <<endl;
+    infoStream<< "  path " << videoPlayer.getMoviePath() <<endl;
+    infoStream<< "  playing " << videoPlayer.isPlaying() <<endl;
+    infoStream<< "  loaded " << videoPlayer.getPlayer() <<endl;
+    infoStream<< "  frame num " << ofGetFrameNum() <<endl;
+    infoStream<< "   isUsingTexture " << videoPlayer.isUsingTexture() <<endl;
+    infoStream<< "   isUsingTexture " << videoPlayer.getTotalNumFrames() <<endl;
+
     
+
 }
 
 //------------------------------------------------------------------------------
 void ofApp::draw(){
-    videoPlayer.play();
     std::stringstream infoStream;
     //cout << "Draw init" << videoPlayer.getCurrentFrame() << endl;
                     //ofLogNotice() << "Drive" <<endl;

@@ -2,3 +2,4 @@ ofxCv
 ofxIpVideoGrabber
 ofxOsc
 ofxXmlSettings
+ofxConsoleCurses

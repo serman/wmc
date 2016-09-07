@@ -17,7 +17,7 @@ void ofApp::setupNC(){
     ofxNcurses::setup();
     ofxNcurses::hideCursor();
     
-    mMainWindow = ofxNcurses::addWindow(0, 0, ofxNcurses::getWidth(), ofxNcurses::getHeight(), true, true);
+    mMainWindow = ofxNcurses::addWindow(0, 0, ofxNcurses::getWidth(), ofxNcurses::getHeight(), false, false);
     mMainWindow->box();
 }
 
@@ -35,14 +35,14 @@ void ofApp::drawNC(stringstream &stream1){
     }
     
     mMainWindow->erase();
-    mMainWindow->moveTo(0,0);
+    //mMainWindow->moveTo(0,0);
     
     for (int i=0; i<worldStr.size(); i++){
         mMainWindow->moveTo(1, i % mMainWindow->getHeight());
         mMainWindow->print(worldStr[i]);
     }
     
-/********
+
     for(int i = 0; i < finder.size(); i++) {
         ofRectangle object = finder.getObject(i);
         
@@ -55,9 +55,9 @@ void ofApp::drawNC(stringstream &stream1){
         mMainWindow->attrOn(nc::Win::COLOR_1);
         mMainWindow->print("BODY " + ofToString( finder.getLabel(i)) );
         mMainWindow->attrOff(nc::Win::COLOR_1);
-        
+ 
     }
-  **/
+ 
     
     
     mMainWindow->moveTo(10,mMainWindow->getHeight() / 2);
