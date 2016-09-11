@@ -94,7 +94,6 @@ void ofApp::setup()
     }
     
     if(HEADLESS){
-        ofLogNotice() << "HEADLESS";
         setupNC();
     }
 }
@@ -203,17 +202,6 @@ void ofApp::update()
     if(status!=SHOOTING){
         updateServoPosition();
     }
-    ofLogNotice() << "videoplayergetposition " << videoPlayer.getPosition() <<endl;
-        std::stringstream infoStream;
-    infoStream<< "  frameRAte: " << ofToString( ofGetFrameRate() ) << endl;
-    infoStream<< "  current video frame: " << videoPlayer.getPosition() <<endl;
-    infoStream<< "  path " << videoPlayer.getMoviePath() <<endl;
-    infoStream<< "  playing " << videoPlayer.isPlaying() <<endl;
-    infoStream<< "  loaded " << videoPlayer.getPlayer() <<endl;
-    infoStream<< "  frame num " << ofGetFrameNum() <<endl;
-    infoStream<< "   isUsingTexture " << videoPlayer.isUsingTexture() <<endl;
-    infoStream<< "   isUsingTexture " << videoPlayer.getTotalNumFrames() <<endl;
-
     
 
 }
@@ -262,11 +250,11 @@ void ofApp::draw(){
         infoStream<< "  frameRAte: " << ofToString( ofGetFrameRate() ) << endl;
         infoStream<< "  current video frame: " << videoPlayer.getPosition() <<endl;
         infoStream<< "  path " << videoPlayer.getMoviePath() <<endl;
-                infoStream<< "  playing " << videoPlayer.isPlaying() <<endl;
+      /*          infoStream<< "  playing " << videoPlayer.isPlaying() <<endl;
                         infoStream<< "  loaded " << videoPlayer.getPlayer() <<endl;
         infoStream<< "  frame num " << ofGetFrameNum() <<endl;
                 infoStream<< "   isUsingTexture " << videoPlayer.isUsingTexture() <<endl;
-                infoStream<< "   isUsingTexture " << videoPlayer.getTotalNumFrames() <<endl;
+                infoStream<< "   isUsingTexture " << videoPlayer.getTotalNumFrames() <<endl;*/
     }
     
     switch(status){
@@ -275,7 +263,7 @@ void ofApp::draw(){
         case 2:         infoStream<< "  Status: FINDING" << endl; break;
         case 3:         infoStream<< "  Status: WAITING RESPONSE" << endl; break;
     }
-    infoStream << "personas" << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
+    infoStream << "personas: " << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
     
     
     if(!HEADLESS){
@@ -317,7 +305,7 @@ void ofApp::drawGraphic(){
     ofPushMatrix();
     if((status==FINDING || status==WAITING_RESPONSE) && finder.size()>0){
         ofTranslate(facesRectangle.x, facesRectangle.y);
-        faceFinder.draw();
+        faceFinder.draw(); //TODO MULTIPLE FACES
     }
     ofPopMatrix();
     ofSetColor(255,255,255);
@@ -423,11 +411,6 @@ void ofApp::keyPressed(int key)
         sender.sendMessage(m);
     }
     if(key == 's' ){
-        //string fileName = "/Users/sergiogalan/temporalborrar/snapshot.png";
-        /*grabFrameEnvio.setFromPixels(grabbers[microsoftGrabber]->getPixels(), grabbers[microsoftGrabber]->getWidth(), grabbers[microsoftGrabber]->getHeight(), OF_IMAGE_COLOR);
-        grabFrameEnvio.update();
-        grabFrameEnvio.saveImage(fileName);
-        ofLog(OF_LOG_NOTICE, "saved file " + fileName);*/
         saveFrameAndNotify();
     }
     if(key == 'b' ){//bang

@@ -23,10 +23,7 @@ void ofApp::setupNC(){
 
 
 void ofApp::drawNC(stringstream &stream1){
-    worldStr.clear();
-    ofLogNotice() << "DRAW NCURSE 1" << stream1.str() <<endl;
-    ofLogNotice() <<  "DRAW NCURSE 2" << videoPlayer.getCurrentFrame() <<endl;
-    
+    worldStr.clear();    
 /** status msgs ***/
     string tok;
     char delimiter='\n';
