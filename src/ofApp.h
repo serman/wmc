@@ -55,7 +55,7 @@
 
 
 #include "ofxNcurses.h"
-enum SCREENMODES { NCURSES,HEADLESS,GRAPHIC};
+enum SCREENMODES { NCURSESMODE,HEADLESS,GRAPHIC};
 
 class settings{
     public:

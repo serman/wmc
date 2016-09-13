@@ -82,7 +82,7 @@ void ofApp::setup()
         serial.setup(msettings.serialPort, 9600);
     }
     
-    if(msettings.HEADLESS == SCREENMODES::NCURSES){
+    if(msettings.HEADLESS == SCREENMODES::NCURSESMODE){
         setupNC();
     }
 }
@@ -230,7 +230,7 @@ void ofApp::draw(){
         ofDrawBitmapString(infoStream.str(), 10, 10+12);
         drawDetection();
     }
-    else if(msettings.HEADLESS==SCREENMODES::NCURSES){
+    else if(msettings.HEADLESS==SCREENMODES::NCURSESMODE){
         drawNC(infoStream);
     }
     
