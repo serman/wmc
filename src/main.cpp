@@ -4,7 +4,7 @@
 
 #define NOWINDOW
 
-#ifdef NCURSES
+#ifdef NC
 #include "ofAppConsoleCurses.h"
 #endif
 
@@ -14,7 +14,7 @@
 
 int main()
 {
-#ifdef NCURSES
+#ifdef NC
     ofAppConsoleCurses window;
     ofSetupOpenGL(&window,1280,720,OF_WINDOW);
 #elseif NOWINDOW

@@ -38,7 +38,7 @@
 /* TIME_BETWEEN_DETECTIONS defines the minimun time betwen API QUERYS **/
 #define NETWORK_TIMEOUT 3000
 
-//#define NCURSES
+//#define NC
 
 // La camara con el zoom a tope va de -15 a 15
 
