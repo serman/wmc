@@ -33,6 +33,7 @@ void ofApp::drawNC(stringstream &stream1){
     
     mMainWindow->erase();
     //mMainWindow->moveTo(0,0);
+    mMainWindow->box();
     
     for (int i=0; i<worldStr.size(); i++){
         mMainWindow->moveTo(1, i % mMainWindow->getHeight());
@@ -57,10 +58,40 @@ void ofApp::drawNC(stringstream &stream1){
  
     
     
-    mMainWindow->moveTo(10,mMainWindow->getHeight() / 2);
-    mMainWindow->attrOn(nc::Win::COLOR_1);
-    mMainWindow->print("HELLO");
-    mMainWindow->attrOff(nc::Win::COLOR_1);
+    if((status==FINDING || status==WAITING_RESPONSE) && finder.size()>0){
+            for(int i = 0; i < faceFinder.size(); i++) {
+                    ofRectangle object = faceFinder.getObject(i);
+                    mMainWindow->moveTo(
+                                                                         ofMap(object.x+facesRectangle.x, 0, videoWidth, 0, mMainWindow->getWidth()),
+                                                                         ofMap(object.y+facesRectangle.y, 0, videoHeight, 0, mMainWindow->getHeight())
+                                                                         );
+                    mMainWindow->attrOn(nc::Win::COLOR_2);
+                    mMainWindow->print("FACE " + ofToString( faceFinder.getLabel(i)) );
+                    mMainWindow->attrOff(nc::Win::COLOR_2);
+                }
+        }
+    
+    for(std::size_t i = 0; i < detections.size(); i++){
+            vector<string> infoStr;
+            if( (ofGetElapsedTimeMillis()/1000) - timeLastDetectionFromAPI < 2 ){
+                    int x1=facesRectangle.x + detections[i].position.x/ratioW;
+                    int y1=facesRectangle.y + detections[i].position.y/ratioH;
+                    mMainWindow->moveTo(
+                                                         ofMap(x1, 0, videoWidth, 0, mMainWindow->getWidth()),
+                                                         ofMap(y1, 0, videoHeight, 0, mMainWindow->getHeight())
+                                                      );
+                    infoStr.push_back ("  beard " + ofToString(detections[i].beard) + '\n') ;
+                    infoStr.push_back ("  age "  + ofToString(detections[i].age) + '\n') ;
+                    infoStr.push_back ("  glasses " + ofToString(detections[i].glasses) + '\n') ;
+                    infoStr.push_back ("  gender " + ofToString(detections[i].gender) + '\n') ;
+                    infoStr.push_back ("  smile " + ofToString(detections[i].smile) + '\n') ;
+                    for (int i=0; i<infoStr.size(); i++){
+                            //mMainWindow->moveTo(1, i % mMainWindow->getHeight());
+                            mMainWindow->print(infoStr[i]);
+                        }
+            
+                }
+        }
     
     mMainWindow->refresh();
     

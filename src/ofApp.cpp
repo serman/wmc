@@ -336,7 +336,7 @@ void ofApp::drawDetection(){
 //------------------------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-    if(key == ' ')
+   /* if(key == ' ')
     {
         // initialize connection
         for(std::size_t i = 0; i < NUM_CAMERAS; i++)
@@ -352,7 +352,7 @@ void ofApp::keyPressed(int key)
             
             grabbers[i] = c;
         }
-    }
+    }*/
     if(key == 'a' || key == 'A'){
         ofxOscMessage m;
         m.setAddress("/video");
