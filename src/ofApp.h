@@ -55,11 +55,12 @@
 
 
 #include "ofxNcurses.h"
+enum SCREENMODES { NCURSES,HEADLESS,GRAPHIC};
 
 class settings{
     public:
         int serialPort=-1;
-        bool HEADLESS=false;
+        int HEADLESS=SCREENMODES::HEADLESS;
         ofLogLevel logLevel=OF_LOG_NOTICE;
         std::string fileName;
         bool useLocalVideo=true;
@@ -67,6 +68,7 @@ class settings{
         std::string OSChost="localhost";
         int OSCport=12345;
         int maxFrameRate;
+    
     
 };
 

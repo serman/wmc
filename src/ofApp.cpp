@@ -8,13 +8,14 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
-    //ofLogToFile(ofToDataPath("log.txt",true) );
+    ofLogToFile(ofToDataPath("log.txt",true) );
     ofSetLogLevel(OF_LOG_VERBOSE);
 
 
     sender.setup(msettings.OSChost, msettings.OSCport);
     loadSettings();
     ofSetFrameRate(msettings.maxFrameRate);
+    ofLogNotice() << ofGetTimestampString("%d-%H %M:%S ") << "STARTING";
     
     ofSetLogLevel(msettings.logLevel);
     int serverRecvPort = 12000;
@@ -81,7 +82,7 @@ void ofApp::setup()
         serial.setup(msettings.serialPort, 9600);
     }
     
-    if(msettings.HEADLESS){
+    if(msettings.HEADLESS == SCREENMODES::NCURSES){
         setupNC();
     }
 }
@@ -146,12 +147,12 @@ void ofApp::update()
                 imgMat2=grabberMat(mroi);
                 faceFinder.update(imgMat2);
                 if(faceFinder.size()>0){
-                    lastFaceTrackingIdSent=finder.getTracker().getLabelFromIndex(i);                    ofLog(OF_LOG_NOTICE) << "id cara" << lastFaceTrackingIdSent;
+                    lastFaceTrackingIdSent=finder.getTracker().getLabelFromIndex(i);
                     detectedFaces++;
                     break;
                 }
             }
-            if(!msettings.HEADLESS){
+            if( msettings.HEADLESS == SCREENMODES::GRAPHIC){
                 //cv::Mat tmpMat;
                 imgMat2.copyTo(tmpMat);
                 // https://github.com/kylemcdonald/ofxCv/issues/163
@@ -163,6 +164,7 @@ void ofApp::update()
             if( (ofGetElapsedTimeMillis()-lastTimeFaceDetectedAndSentToAPI) > MIN_TIME_API_QUERY){
                 lastTimeFaceDetectedAndSentToAPI=ofGetElapsedTimeMillis();
                 saveFrameAndNotify();
+                ofLog(OF_LOG_VERBOSE)<<ofGetTimestampString("%d-%H %M:%S ") << "Caras Detectadas: " << detectedFaces;
                 status=WAITING_RESPONSE;
             }
         }
@@ -180,13 +182,10 @@ void ofApp::draw(){
     int f=round( ofGetFrameRate()); if(f<1) f=1;
     
     std::stringstream infoStream;
-    if(!msettings.HEADLESS){
+    if(msettings.HEADLESS==SCREENMODES::GRAPHIC){
         drawGraphic();
     }
 
-    if(ofGetFrameNum()%f==0){
-        ofLogVerbose("personas" + ofToString(finder.size()) + " ___ Caras: " + ofToString(faceFinder.size()));
-    }
     
     if(msettings.useLocalVideo==false){
         ofSetHexColor(0xffffff);
@@ -227,15 +226,20 @@ void ofApp::draw(){
     infoStream << "Personas: " << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
     
     
-    if(!msettings.HEADLESS){
+    if(msettings.HEADLESS==SCREENMODES::GRAPHIC){
         ofDrawBitmapString(infoStream.str(), 10, 10+12);
         drawDetection();
     }
-    else{
+    else if(msettings.HEADLESS==SCREENMODES::NCURSES){
         drawNC(infoStream);
     }
     
-    if(ofGetFrameNum()%f==0){  ofLogVerbose() << "logverbose 2" << infoStream.str(); }
+    else if(msettings.HEADLESS==SCREENMODES::HEADLESS && ( (ofGetFrameNum() % (msettings.maxFrameRate*100)) ==0  )
+            ){
+        ofLogNotice() << infoStream.str();
+    }
+    
+    
     
     /******* POST DRAW UPDATES ****/
     if(status==SHOOTING){
@@ -456,7 +460,7 @@ void ofApp::updateServoPosition(){
                 if ( !byteWasWritten )
                     ofLogError("byte was not written to serial port");
             }
-            ofLogNotice()<< "angulo " << int(angulo);
+            //ofLogNotice()<< "angulo " << int(angulo);
             
         }
         timeLastMotorRotation=ofGetElapsedTimeMillis();
@@ -544,10 +548,8 @@ void ofApp::loadSettings()
         msettings.useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
         msettings.videoName= XML.getValue("videoName","abierto.mp4");
         msettings.serialPort= XML.getValue("serialPort",-1);
-        msettings.HEADLESS= XML.getValue("headless",0);
-#ifdef NCURSES
-        msettings.HEADLESS=1;
-#endif
+        msettings.HEADLESS= XML.getValue("headless",1);
+
         msettings.logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
         msettings.maxFrameRate= XML.getValue("maxFrameRate",25);
         ofLog(OF_LOG_VERBOSE, "filename: " + msettings.fileName);

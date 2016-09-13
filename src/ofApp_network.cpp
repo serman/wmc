@@ -63,7 +63,7 @@ void ofApp::takeShootingDecision(){
 void ofApp::killThatOne(){
     // send arduino Orde
         status=SHOOTING;
-        ofLog(OF_LOG_VERBOSE, ofToString(detections.size()) + "DISPARO " + ofToString(ofGetElapsedTimeMillis()/1000));
+        ofLogNotice() << ofGetTimestampString("%d-%H %M:%S ") << ofToString(detections.size()) + "DISPARO " + ofToString(ofGetElapsedTimeMillis()/1000);
     
         if(finder.getTracker().existsCurrent(lastFaceTrackingIdSent)){
         //detectado sigue existiendo
