@@ -33,8 +33,7 @@
 #include "ofxOsc.h"
 
 
-#define HOST "localhost"
-#define PORT 12345
+
 #define MIN_TIME_API_QUERY 1000 
 /* TIME_BETWEEN_DETECTIONS defines the minimun time betwen API QUERYS **/
 #define NETWORK_TIMEOUT 3000
@@ -56,6 +55,21 @@
 
 
 #include "ofxNcurses.h"
+
+class settings{
+    public:
+        int serialPort=-1;
+        bool HEADLESS=false;
+        ofLogLevel logLevel=OF_LOG_NOTICE;
+        std::string fileName;
+        bool useLocalVideo=true;
+        std::string videoName;
+        std::string OSChost="localhost";
+        int OSCport=12345;
+        int maxFrameRate;
+    
+};
+
 
 class detectionData
 {
@@ -163,9 +177,11 @@ public:
     void setupNC();
     void updateNC();
     void drawNC(stringstream &stream1);
+/*******/
 
-    /*******/
     ofxOscSender sender;
+    
+
     long lastTimeFaceDetectedAndSentToAPI=0;
     int timeHibernStarted=0;
     int timeLastDetectionFromAPI=0;
@@ -176,7 +192,7 @@ public:
     ofImage grabFrame;
     ofImage grabFrameEnvio;
     ofImage grabFrameDetectBody;
-    std::string fileName;
+
     int faceTrackingGrabber=0;
     int microsoftGrabber=1;
     
@@ -185,7 +201,7 @@ public:
 
     std::vector<std::shared_ptr<Video::IPVideoGrabber>> grabbers;
 
-    void loadCameras();
+    void loadSettings();
     IPCameraDef& getNextCamera();
     std::vector<IPCameraDef> ipcams; // a list of IPCameras
     std::size_t nextCamera;
@@ -197,11 +213,10 @@ public:
     void videoResized(const void* sender, ofResizeEventArgs& arg);
     
     
-    bool useLocalVideo=true;
+
     //solo en el caso de usar videograbber
     ofVideoPlayer 		videoPlayer;
     bool                frameByframe;
-    std::string videoName;
     int videoWidth = 704;
     int videoHeight = 576;
     float ratioW=1;
@@ -217,7 +232,8 @@ public:
     cv::Rect targetMoved;
     cv::Mat imgMat2;
     cv::Mat grabberMat;
-            cv::Mat tmpMat;
+    cv::Mat tmpMat;
+    
     enum modes {
         HIBERN,     /* SET RIGHT AFTER SHOT, BUT LATER. IT MEANS IT SHOULDN'T SHOT MORE FOR A TIME */
         SHOOTING, /* SET RIGHT AFTER SHOT */
@@ -230,18 +246,18 @@ public:
     /****arduino  ***/
      
     ofSerial serial;
-    int serialPort;
+
     unsigned char bangMsg[3] = {'b',0, '\n'};
     unsigned char servoMsg[3] = {'s', 0, '\n'};
     unsigned char bangServoMsg[3] = {'p', 0, '\n'};
     void updateServoPosition();
-    bool HEADLESS=false;
-    ofLogLevel logLevel=OF_LOG_NOTICE;
+
     
     int lastFaceTrackingIdSent=0;
 private:
     const int aperturaCamara = 15;
-    const int maxAngleServo = 60;
+    const int maxDeltaAngleServo = 60;
+    settings msettings;
     
 };
 

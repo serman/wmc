@@ -63,22 +63,24 @@ void ofApp::takeShootingDecision(){
 void ofApp::killThatOne(){
     // send arduino Orde
         status=SHOOTING;
-        ofLog(OF_LOG_NOTICE, ofToString(detections.size()) + "DISPARO " + ofToString(ofGetElapsedTimeMillis()/1000));
+        ofLog(OF_LOG_VERBOSE, ofToString(detections.size()) + "DISPARO " + ofToString(ofGetElapsedTimeMillis()/1000));
+    
         if(finder.getTracker().existsCurrent(lastFaceTrackingIdSent)){
         //detectado sigue existiendo
-            ofLog(OF_LOG_NOTICE) << "detectado sigue existiendo" << lastFaceTrackingIdSent;
+            ofLog(OF_LOG_VERBOSE) << "detectado sigue existiendo" << lastFaceTrackingIdSent;
             targetMoved=finder.getTracker().getCurrent(lastFaceTrackingIdSent);
 //            getIndexFromLabel(lastFaceTrackingIdSent);
             
             int p1=targetMoved.x +targetMoved.width/2;
             int resolucion = videoWidth;
-            unsigned char angulo= ofMap(p1,0,resolucion,maxAngleServo,0);
-            if(angulo>=0 && angulo <= maxAngleServo){ //verificación redundante pero por si acaso
+            unsigned char angulo= ofMap(p1,0,resolucion,maxDeltaAngleServo,0);
+            if(angulo>=0 && angulo <= maxDeltaAngleServo){ //verificación redundante pero por si acaso
                 bangServoMsg[1]=angulo;
                 if(serial.isInitialized()){
                     bool byteWasWritten = serial.writeBytes(&bangServoMsg[0],3);
                     if ( !byteWasWritten )
                         ofLogError("byte was not written to serial port");
+                    timeLastMotorRotation=ofGetElapsedTimeMillis();
                 }
                 
             }
@@ -88,9 +90,10 @@ void ofApp::killThatOne(){
                 }
             }
         }
-        else{ //detectado ya no existe
+        else{
+        //detectado ya no existe
             targetMoved.width=0;
-            ofLog(OF_LOG_NOTICE) << "detectado ya no existe. Disparo en la posicion actual";
+            ofLog(OF_LOG_VERBOSE) << "detectado ya no existe. Disparo en la posicion actual";
             if(serial.isInitialized()){
                 bool byteWasWritten = serial.writeBytes(&bangMsg[0],3);
                 if ( !byteWasWritten )

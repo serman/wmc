@@ -8,22 +8,20 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
-    ofLogToFile(ofToDataPath("log.txt",true) );
+    //ofLogToFile(ofToDataPath("log.txt",true) );
     ofSetLogLevel(OF_LOG_VERBOSE);
 
-    fileName="";
 
-    ofSetFrameRate(8);
-    sender.setup(HOST, PORT);
-    loadCameras();
+    sender.setup(msettings.OSChost, msettings.OSCport);
+    loadSettings();
+    ofSetFrameRate(msettings.maxFrameRate);
     
-    ofSetLogLevel(logLevel);
-    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetLogLevel(msettings.logLevel);
     int serverRecvPort = 12000;
     string dst="localhost";
     myosc.setup(serverRecvPort);
     
-    if(useLocalVideo==false){
+    if(msettings.useLocalVideo==false){
         // initialize connection
         for(std::size_t i = 0; i < NUM_CAMERAS; i++)
         {
@@ -41,25 +39,15 @@ void ofApp::setup()
             grabbers.push_back(grabber);
         }
         
-/*        for(std::size_t i = 0; i < grabbers.size(); i++){
-            grabbers[i]->update();
-            if(grabbers[i]->getWidth()<1000){ //TODO niapa de elegir fuente
-                faceTrackingGrabber=i;
-            }
-            else{
-                microsoftGrabber=i;
-            }
-        }*/
         faceTrackingGrabber=0;
         microsoftGrabber=1;
         ratioW=1280.0/videoWidth;
         ratioH=1024.0/videoHeight;
         
     }else{
-        videoPlayer.load(videoName);
-        //videoPlayer.setLoopState(OF_LOOP_NORMAL);
+        videoPlayer.load(msettings.videoName);
         videoPlayer.play();
-        //videoPlayer.setLoopState(OF_LOOP_NORMAL);
+        videoPlayer.setLoopState(OF_LOOP_NORMAL);
         videoPlayer.getPlayer()->getTotalNumFrames();
         
         ratioW=1;
@@ -89,11 +77,11 @@ void ofApp::setup()
     
     serial.listDevices();
 /*    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();*/
-    if(serialPort>=0){
-        serial.setup(serialPort, 9600);
+    if(msettings.serialPort>=0){
+        serial.setup(msettings.serialPort, 9600);
     }
     
-    if(HEADLESS){
+    if(msettings.HEADLESS){
         setupNC();
     }
 }
@@ -111,7 +99,7 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
             ss<< "videoResized: ";
             ss<< "Camera connected to: " << grabbers[i]->getURI() + " ";
             ss<< "New DIM = " << arg.width << "/" << arg.height;
-            ofLogVerbose("ofApp") << ss.str();
+            ofLogNotice("ofApp videoResized") << ss.str();
         }
     }
 }
@@ -121,10 +109,7 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 //------------------------------------------------------------------------------
 void ofApp::update()
 {
-    //ofLogNotice() << "uupdate init" << ofGetFrameNum() <<endl;
     
-    
-    // update the cameras
     if(status==HIBERN &&  ( (ofGetElapsedTimeMillis()/1000) - timeHibernStarted > 5 ) ){
         status=FINDING;
     }
@@ -132,49 +117,33 @@ void ofApp::update()
         if( (ofGetElapsedTimeMillis()-lastTimeFaceDetectedAndSentToAPI) > NETWORK_TIMEOUT)
             status=FINDING;
     }
-    /*** ACTUALIZACION DE IMAGENES DE CAMARA ***/
-    if(useLocalVideo==false){
+/*** ACTUALIZACION DE IMAGENES DE CAMARA ***/
+    if(msettings.useLocalVideo==false){
         grabbers[faceTrackingGrabber]->update();
 
         grabberMat = toCv(grabbers[faceTrackingGrabber]->getPixels());
-      //  grabbers[faceTrackingGrabber]->getPixel
         toOf(grabberMat,grabFrame.getPixels());
         grabFrame.update();
         
     }else{
         videoPlayer.update();
-        ofLogNotice() << " videoPlayer inside" << videoPlayer.getCurrentFrame() <<endl;
         if(videoPlayer.isFrameNew() ){
-            ofLogNotice() << " videoPlayer FrameNew" << videoPlayer.getCurrentFrame() <<endl;
-
-            //unsigned char * pixels ;
-            //pixels = videoPlayer.getPixels();
-            //grabFrame.setFromPixels(pixels, videoWidth,videoHeight, OF_IMAGE_COLOR);
             grabberMat = toCv(videoPlayer.getPixels());
             toOf(grabberMat,grabFrame.getPixels());
             grabFrame.update();
         }
     }
     /*****  *****/
-    
        
     
     if(grabberMat.rows >100 && ( status==FINDING || status==WAITING_RESPONSE ) ){
-        //Mat imgMat = toCv(grabFrame);
-
         finder.update( grabberMat );
         int detectedFaces=0;
         if(finder.size()>0 && status==FINDING ){ //Si est‡ en modo busqueda y ha encontrado algo...
             for(int i=0; i<finder.size(); i++){
                 ofRectangle r= finder.getObject(i);
                 cv::Rect mroi=cv::Rect(r.x,r.y,r.width, r.height);
-                //cout << r.x << " " << r.y <<" " << r.width << "\n";
-                //Mat imgMat = toCv(grabFrame);
-                //Mat imgMat3=imgMat(mroi);
-                 imgMat2=grabberMat(mroi);
-                //FaceFinder
-                //imgMat2=toCv(grabFrameEnvio);
-                //Mat imgMat3=toCv(grabFrameEnvio);
+                imgMat2=grabberMat(mroi);
                 faceFinder.update(imgMat2);
                 if(faceFinder.size()>0){
                     lastFaceTrackingIdSent=finder.getTracker().getLabelFromIndex(i);                    ofLog(OF_LOG_NOTICE) << "id cara" << lastFaceTrackingIdSent;
@@ -182,11 +151,11 @@ void ofApp::update()
                     break;
                 }
             }
-            if(!HEADLESS){
-            //cv::Mat tmpMat;
-            imgMat2.copyTo(tmpMat);
-            // https://github.com/kylemcdonald/ofxCv/issues/163
-            // Sin este copyTo una submatriz (ya que al usar roi no se copian pixels) no se copiar’a correctamente y se ve raro.
+            if(!msettings.HEADLESS){
+                //cv::Mat tmpMat;
+                imgMat2.copyTo(tmpMat);
+                // https://github.com/kylemcdonald/ofxCv/issues/163
+                // Sin este copyTo una submatriz (ya que al usar roi no se copian pixels) no se copiar’a correctamente y se ve raro.
             }
         }
         
@@ -208,33 +177,25 @@ void ofApp::update()
 
 //------------------------------------------------------------------------------
 void ofApp::draw(){
+    int f=round( ofGetFrameRate()); if(f<1) f=1;
+    
     std::stringstream infoStream;
-    //cout << "Draw init" << videoPlayer.getCurrentFrame() << endl;
-                    //ofLogNotice() << "Drive" <<endl;
-    if(!HEADLESS){
+    if(!msettings.HEADLESS){
         drawGraphic();
     }
-    else{
-        int f=round( ofGetFrameRate()); if(f<1) f=1;
-        if(ofGetFrameNum()%f==0){
-            ofLogVerbose("personas" + ofToString(finder.size()) + " ___ Caras: " + ofToString(faceFinder.size()));
-        }
+
+    if(ofGetFrameNum()%f==0){
+        ofLogVerbose("personas" + ofToString(finder.size()) + " ___ Caras: " + ofToString(faceFinder.size()));
     }
     
-
-
-    if(useLocalVideo==false){
+    if(msettings.useLocalVideo==false){
         ofSetHexColor(0xffffff);
         float kbps = grabbers[faceTrackingGrabber]->getBitRate() / 1000.0f; // kilobits / second, not kibibits / second
         float fps = grabbers[faceTrackingGrabber]->getFrameRate();
-        
-        // ofToString formatting available in 0072+
         infoStream<< "          NAME: " << grabbers[faceTrackingGrabber]->getCameraName() << endl;
         infoStream<< "          HOST: " << grabbers[faceTrackingGrabber]->getHost() << endl;
         infoStream<< "           FPS: " << ofToString(fps,  2) << endl;
         infoStream<< "          Kb/S: " << ofToString(kbps, 2) << endl;
-     //   infoStream<< " #Bytes Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumBytesReceived(),  0) << endl;
-      //  infoStream<< "#Frames Recv'd: " << ofToString(grabbers[faceTrackingGrabber]->getNumFramesReceived(), 0) << endl;
         infoStream<< "Width: " << ofToString(grabbers[faceTrackingGrabber]->getWidth()) << endl;
         infoStream<< "Height: " << ofToString(grabbers[faceTrackingGrabber]->getHeight()) << endl;
         infoStream<< "Auto Reconnect: " << (grabbers[faceTrackingGrabber]->getAutoReconnect() ? "YES" : "NO") << endl;
@@ -263,40 +224,32 @@ void ofApp::draw(){
         case 2:         infoStream<< "  Status: FINDING" << endl; break;
         case 3:         infoStream<< "  Status: WAITING RESPONSE" << endl; break;
     }
-    infoStream << "personas: " << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
+    infoStream << "Personas: " << ofToString(finder.size()) << " ___ Caras: " << ofToString(faceFinder.size() );
     
     
-    if(!HEADLESS){
+    if(!msettings.HEADLESS){
         ofDrawBitmapString(infoStream.str(), 10, 10+12);
         drawDetection();
     }
     else{
         drawNC(infoStream);
-        int f=round( ofGetFrameRate()*4);
-        if(f<1) f=1;
-        if(ofGetFrameNum()%f==0){
-            ofLogVerbose() << "logverbose 2" << infoStream.str();
-        }
     }
     
+    if(ofGetFrameNum()%f==0){  ofLogVerbose() << "logverbose 2" << infoStream.str(); }
     
     /******* POST DRAW UPDATES ****/
     if(status==SHOOTING){
         status=HIBERN; //TODO mover esto al update
         timeHibernStarted=ofGetElapsedTimeMillis()/1000;
     }
-    ofLogVerbose() << "Draw End" << videoPlayer.getCurrentFrame() << endl;
 }
 
 void ofApp::drawGraphic(){
-    
     ofBackground(0,0,0);
     ofEnableAlphaBlending();
     ofSetColor(0,80);
     ofDrawRectangle(5,5, 150, 40);
-    
     ofSetColor(255);
-    
     ofDisableAlphaBlending();
     
     grabFrame.draw(0,0,grabFrame.getWidth(),grabFrame.getHeight());
@@ -319,15 +272,14 @@ void ofApp::drawGraphic(){
     drawMat(tmpMat, 750, 100);
     
     ofDrawBitmapStringHighlight(ofToString(finder.size()), 10, 20);
-    //ofLog(OF_LOG_NOTICE, "file name file " + fileName);
     
     
     // SECTION dibuja una aproximacion del angulo del motor
     ofPushMatrix();
     ofTranslate(grabFrame.getWidth()/2, 20);
     unsigned int ang=(unsigned int) servoMsg[1];
-    int minAng=270-(maxAngleServo/2);
-    int maxAng=270+(maxAngleServo/2);
+    int minAng=270-(maxDeltaAngleServo/2);
+    int maxAng=270+(maxDeltaAngleServo/2);
     
     int x1 = 200*cos(ofDegToRad(maxAng-ang));
     int y1 = -200*sin(ofDegToRad(maxAng-ang));
@@ -414,7 +366,14 @@ void ofApp::keyPressed(int key)
         saveFrameAndNotify();
     }
     if(key == 'b' ){//bang
-        killThatOne();
+//        killThatOne();
+        bangServoMsg[1]=10;
+        if(serial.isInitialized()){
+            bool byteWasWritten = serial.writeBytes(&bangServoMsg[0],3);
+            if ( !byteWasWritten )
+                ofLogError("byte was not written to serial port");
+            timeLastMotorRotation=ofGetElapsedTimeMillis();
+        }
     }
     
 }
@@ -436,7 +395,7 @@ void ofApp::getContour(){
 void ofApp::saveFrameAndNotify(){
     
     //string fileName = "/Users/sergiogalan/temporalborrar/snapshot.png";
-    if(useLocalVideo==false){ //si usamos la camara
+    if(msettings.useLocalVideo==false){ //si usamos la camara
 
         grabbers[microsoftGrabber]->update();
         grabFrameEnvio.setFromPixels(
@@ -444,36 +403,30 @@ void ofApp::saveFrameAndNotify(){
                                      grabbers[microsoftGrabber]->getWidth(),
                                      grabbers[microsoftGrabber]->getHeight(),
                                      OF_IMAGE_COLOR);
-        //grabFrameEnvio.update();
+        grabFrameEnvio.update();
         getContour();
         
         
-                cout << grabbers[microsoftGrabber]->getWidth() << " " << grabbers[microsoftGrabber]->getHeight()  << " " << ratioW  << " " << ratioH;
+//cout << grabbers[microsoftGrabber]->getWidth() << " " << grabbers[microsoftGrabber]->getHeight()  << " " << ratioW  << " " << ratioH;
         
         //TODO testear que esto fncione
         grabFrameEnvio.crop(facesRectangle.x*ratioW, facesRectangle.y*ratioH, facesRectangle.width*ratioW, facesRectangle.height*ratioH);
         
-        grabFrameEnvio.save(fileName);
-        //grabFrame.save("/Users/sergiogalan/temporalborrar/snapshot.jpg");
+        grabFrameEnvio.save(msettings.fileName);
         
     }
     else{
         unsigned char * pixels ;
-        //pixels = videoPlayer.getPixels();
-        //grabFrameEnvio.setFromPixels(pixels, videoWidth,videoHeight, OF_IMAGE_COLOR);
-        //grabFrameEnvio.update();
         getContour();
         cv::Rect r = cv::Rect(facesRectangle.x, facesRectangle.y, facesRectangle.width, facesRectangle.height);
         cv::Mat m1=grabberMat(r);
         cv::Mat m2tmp;
         m1.copyTo(m2tmp);
-         toOf(m2tmp,grabFrameEnvio);
+        toOf(m2tmp,grabFrameEnvio);
         grabFrameEnvio.update();
-        
-//        grabFrameEnvio.crop(facesRectangle.x, facesRectangle.y, facesRectangle.width, facesRectangle.height);
-        grabFrameEnvio.save(fileName);
+        grabFrameEnvio.save(msettings.fileName);
     }
-    ofLog(OF_LOG_VERBOSE, ofToString( ofGetElapsedTimeMillis()/1000) + ": saved file " + fileName);
+//ofLog(OF_LOG_VERBOSE, ofToString( ofGetElapsedTimeMillis()/1000) + ": saved file " + msettings.fileName);
     ofxOscMessage m;
     m.setAddress("/video");
     m.addIntArg(1);
@@ -488,20 +441,22 @@ void ofApp::updateServoPosition(){
     //No quiero estar moviendo todo el rato....
     if(ofGetElapsedTimeMillis()-timeLastMotorRotation>400 && finder.size()>0){
         int p1=finder.getObject(0).position.x +finder.getObject(0).width/2;
-      //  p1=ofGetMouseX();
         int resolucion = videoWidth;
-//        unsigned char angulo= (p1/resolucion) *2* aperturaCamara - aperturaCamara+90;
+
+  //        unsigned char angulo= (p1/resolucion) *2* aperturaCamara - aperturaCamara+90;
   //      int angulo2 = (p1/resolucion) *2* aperturaCamara - aperturaCamara+90;
-        unsigned char angulo= ofMap(p1,0,resolucion,maxAngleServo,0);
+        
+        unsigned char angulo= ofMap(p1/*ofGetMouseX()*/,0,resolucion,maxDeltaAngleServo,0);
         
         //ofLogNotice("angulo " + ofToString((int)angulo));
-        if(angulo>=0 && angulo <= maxAngleServo){ //verificaci—n redundante pero por si acaso
+        if(angulo>=0 && angulo <= maxDeltaAngleServo){ //verificaci—n redundante pero por si acaso
             servoMsg[1]=angulo;
             if(serial.isInitialized()){
                 bool byteWasWritten = serial.writeBytes(&servoMsg[0],3);
                 if ( !byteWasWritten )
                     ofLogError("byte was not written to serial port");
             }
+            ofLogNotice()<< "angulo " << int(angulo);
             
         }
         timeLastMotorRotation=ofGetElapsedTimeMillis();
@@ -522,7 +477,7 @@ IPCameraDef& ofApp::getNextCamera()
 }
 
 //------------------------------------------------------------------------------
-void ofApp::loadCameras()
+void ofApp::loadSettings()
 {
     
     // all of these cameras were found using this google query
@@ -585,19 +540,17 @@ void ofApp::loadCameras()
         
         XML.popTag();
         
-        fileName = XML.getValue("file","");
-        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
-        useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
-        videoName= XML.getValue("videoName","abierto.mp4");
-        serialPort= XML.getValue("serialPort",-1);
-        HEADLESS= XML.getValue("headless",0);
-        
+        msettings.fileName = XML.getValue("file","");
+        msettings.useLocalVideo= (bool)XML.getValue("useLocalVideo",1);
+        msettings.videoName= XML.getValue("videoName","abierto.mp4");
+        msettings.serialPort= XML.getValue("serialPort",-1);
+        msettings.HEADLESS= XML.getValue("headless",0);
 #ifdef NCURSES
-        HEADLESS=1;
+        msettings.HEADLESS=1;
 #endif
-        logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
-        
-        ofLog(OF_LOG_VERBOSE, "filename: " + fileName);
+        msettings.logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
+        msettings.maxFrameRate= XML.getValue("maxFrameRate",25);
+        ofLog(OF_LOG_VERBOSE, "filename: " + msettings.fileName);
         
     }
     else
