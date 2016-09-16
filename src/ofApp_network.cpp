@@ -29,7 +29,7 @@ void ofApp::oscRcvUpdate(){
         detections.clear();
         // check for mouse moved message
         if(m.getAddress() == "/face"){
-            cout << ofToString(m.getNumArgs());
+            //cout << ofToString(m.getNumArgs());
             detectionData d;
             d.set(m.getArgAsInt32(0),//x
                   m.getArgAsInt32(1),//y
@@ -42,7 +42,9 @@ void ofApp::oscRcvUpdate(){
                   m.getArgAsInt32(8)//smile
                   );
             detections.push_back(d);
+            ofLogVerbose()<< ofGetTimestampString("%d-%H %M:%S ")<< "data from Msoft: " << d.print() << endl;
             timeLastDetectionFromAPI=ofGetElapsedTimeMillis()/1000;
+            
         }
         status=FINDING;
         takeShootingDecision();
@@ -55,15 +57,17 @@ void ofApp::oscRcvUpdate(){
 void ofApp::takeShootingDecision(){
     //detections
     for(std::size_t i = 0; i < detections.size(); i++){
-       if(detections[i].age>30 /*&& detections[i].beard>0.5*/ )
+       if(detections[i].age>25 && detections[i].age<50 && detections[i].beard>50 && detections[i].gender==0 )
            killThatOne();
+            ofLogNotice()<< ofGetTimestampString("%d-%H %M:%S ")<< "BANG!!!" << detections[i].print() << endl;
     }
     
 }
 void ofApp::killThatOne(){
     // send arduino Orde
         status=SHOOTING;
-        ofLogNotice() << ofGetTimestampString("%d-%H %M:%S ") << ofToString(detections.size()) + "DISPARO " + ofToString(ofGetElapsedTimeMillis()/1000);
+    
+        manalytics.addShot();
     
         if(finder.getTracker().existsCurrent(lastFaceTrackingIdSent)){
         //detectado sigue existiendo

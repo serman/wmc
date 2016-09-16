@@ -8,7 +8,7 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
-    ofLogToFile(ofToDataPath("log.txt",true) );
+    //ofLogToFile(ofToDataPath("log.txt",true) );
     ofSetLogLevel(OF_LOG_VERBOSE);
 
 
@@ -29,7 +29,6 @@ void ofApp::setup()
             IPCameraDef& cam = getNextCamera();
             
             auto grabber = std::make_shared<Video::IPVideoGrabber>();
-
             
             grabber->setCameraName(cam.getName());
             grabber->setURI(cam.getURL());
@@ -100,7 +99,7 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
             ss<< "videoResized: ";
             ss<< "Camera connected to: " << grabbers[i]->getURI() + " ";
             ss<< "New DIM = " << arg.width << "/" << arg.height;
-            ofLogNotice("ofApp videoResized") << ss.str();
+            ofLogNotice()  << ofGetTimestampString("%d-%H %M:%S ") << " ofApp videoResized"<< ss.str();
         }
     }
 }
@@ -115,8 +114,11 @@ void ofApp::update()
         status=FINDING;
     }
     if(status==WAITING_RESPONSE){ //checking for a network timeout
-        if( (ofGetElapsedTimeMillis()-lastTimeFaceDetectedAndSentToAPI) > NETWORK_TIMEOUT)
+        if( (ofGetElapsedTimeMillis()-lastTimeFaceDetectedAndSentToAPI) > NETWORK_TIMEOUT){
             status=FINDING;
+             ofLogNotice()  << ofGetTimestampString("%d-%H %M:%S ") << " NETWORK TIMEOUT";
+            
+        }
     }
 /*** ACTUALIZACION DE IMAGENES DE CAMARA ***/
     if(msettings.useLocalVideo==false){
@@ -173,8 +175,7 @@ void ofApp::update()
     if(status!=SHOOTING){
         updateServoPosition();
     }
-    
-
+    manalytics.update();
 }
 
 //------------------------------------------------------------------------------
@@ -236,7 +237,7 @@ void ofApp::draw(){
     
     else if(msettings.HEADLESS==SCREENMODES::HEADLESS && ( (ofGetFrameNum() % (msettings.maxFrameRate*100)) ==0  )
             ){
-        ofLogNotice() << infoStream.str();
+        ofLogNotice() <<ofGetTimestampString("%d-%H %M:%S ")  <<  infoStream.str();
     }
     
     
@@ -438,6 +439,8 @@ void ofApp::saveFrameAndNotify(){
     //m.addStringArg("hello");
     m.addFloatArg(ofGetElapsedTimef());
     sender.sendMessage(m);
+    manalytics.addDetection();
+    
 }
 
 
@@ -537,7 +540,7 @@ void ofApp::loadSettings()
             " password: " + def.getPassword() +
             " auth: " + std::to_string(static_cast<int>((def.getAuthType())));
             
-            ofLogVerbose() << logMessage;
+            ofLogVerbose() << ofGetTimestampString("%d-%H %M:%S ") << logMessage;
             
             ipcams.push_back(def);
         }

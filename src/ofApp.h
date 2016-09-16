@@ -55,6 +55,8 @@
 
 
 #include "ofxNcurses.h"
+#include "analytics.h"
+
 enum SCREENMODES { NCURSESMODE,HEADLESS,GRAPHIC};
 
 class settings{
@@ -80,7 +82,7 @@ public:
     {
     }
     ofRectangle position;
-    int moustache;
+    //int moustache;
     int beard;
     int age;
     int glasses;
@@ -94,6 +96,12 @@ public:
         glasses=_glasses;
         gender=_gender;
         smile=_smile;
+    }
+    
+    std::string print(){
+        std::string s= "beard " + ofToString(beard) + " age: " + ofToString(age) +  " glasses: " + ofToString(glasses) +  " gender: " + ofToString(gender) +  " smile: " + ofToString(smile);
+        
+        return s;
     }
     
 };
@@ -256,6 +264,7 @@ public:
 
     
     int lastFaceTrackingIdSent=0;
+    analytics manalytics;
 private:
     const int aperturaCamara = 15;
     const int maxDeltaAngleServo = 60;
