@@ -63,8 +63,8 @@ def sendDataOSC(result):
         msg.setAddress("/face")
         #int x, int y, int w, int h, int _beard, int _age, int _glasses, int _gender, int _smile
         msg.append([faceRectangle['left'], faceRectangle['top'], faceRectangle['width'],  faceRectangle['height'] ]) 
-        msg.append(round(currFace['faceAttributes']['facialHair']['beard']*100))
-        msg.append(round(currFace['faceAttributes']['age']))
+        msg.append(int(round(currFace['faceAttributes']['facialHair']['beard']*100)))
+        msg.append(int(round(currFace['faceAttributes']['age'])))
         
         if( currFace['faceAttributes']['glasses'] == 'NoGlasses'):
             msg.append(0)
@@ -74,7 +74,7 @@ def sendDataOSC(result):
             msg.append(0)
         else: msg.append(1)
 
-        msg.append(round(currFace['faceAttributes']['smile']*100))
+        msg.append(int(round(currFace['faceAttributes']['smile']*100)))
 
         #msg.append(str(currFace['faceAttributes']))
         msg.append(currFace['faceId'])
