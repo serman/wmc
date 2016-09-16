@@ -13,8 +13,10 @@ import urllib
 import OSC
 import threading
 
-aperturaCamara = 15 # La camara con el zoom a tope va de -15 a 15
-resolucion = 1280.0
+#aperturaCamara = 15 # La camara con el zoom a tope va de -15 a 15
+#resolucion = 1280.0
+
+pathToFileInDisk = '/Users/sergiogalan/temporalborrar/snapshot2.jpg'
 
 s=None   #Servidor osc
 #arduinoSerial   = serial.Serial('/dev/cu.usbmodem621', 9600)
@@ -30,8 +32,8 @@ run = True
 #import matplotlib.pyplot as plt
 #%matplotlib inline
 _url = 'https://api.projectoxford.ai/face/v1.0/detect'
-#_key = '726500e04dc94de9a75e33ddd9310cfc'
-_key = 'f9cf739b3848457b8ca4dfa6912f09ee'
+_key = '726500e04dc94de9a75e33ddd9310cfc'
+#_key = 'f9cf739b3848457b8ca4dfa6912f09ee'
 _maxNumRetries = 2
 pause=False;
 
@@ -52,29 +54,42 @@ def rcvOscOF():
 
 def sendDataOSC(result):  
     msg = OSC.OSCMessage()
-
+    mustUpload=False;
+    atLeastOne=False;
     for currFace in result:
+        atLeastOne=True
         faceRectangle = currFace['faceRectangle']
         print(str(currFace['faceAttributes']))
         msg.setAddress("/face")
         #int x, int y, int w, int h, int _beard, int _age, int _glasses, int _gender, int _smile
         msg.append([faceRectangle['left'], faceRectangle['top'], faceRectangle['width'],  faceRectangle['height'] ]) 
-        msg.append(currFace['faceAttributes']['facialHair']['beard'])
-        msg.append(currFace['faceAttributes']['age'])
+        msg.append(round(currFace['faceAttributes']['facialHair']['beard']*100))
+        msg.append(round(currFace['faceAttributes']['age']))
         
-        if( currFace['faceAttributes']['age'] == 'NoGlasses'):
+        if( currFace['faceAttributes']['glasses'] == 'NoGlasses'):
             msg.append(0)
         else: msg.append(1)
 
         if( currFace['faceAttributes']['gender'] == 'male'):
             msg.append(0)
         else: msg.append(1)
-        msg.append(currFace['faceAttributes']['smile'])
+
+        msg.append(round(currFace['faceAttributes']['smile']*100))
 
         #msg.append(str(currFace['faceAttributes']))
         msg.append(currFace['faceId'])
+        if(currFace['faceAttributes']['age']>25 and currFace['faceAttributes']['age']< 50):
+            if(currFace['faceAttributes']['facialHair']['beard']>0.5):
+                mustUpload=True
+
     client.send(msg)
     print("sent OSC Data " + str(msg))
+    if(atLeastOne==False):
+        print("NO FACE" )
+    if(mustUpload):
+        r = requests.post('http://server.eclectico.net/upload.php', files={'file': open(pathToFileInDisk, 'rb')})
+        #print (r.text)
+        #pass;
 
         
 
@@ -94,10 +109,10 @@ def rcvMessage(addr, tags, stuff, source):
       #self.sendVideos()
       #cherrypy.engine.publish('websocket-broadcast', TextMessage( self.myModel.currentContentAsJson() ) )    
 
-def sendDataLocal(pathFile):
-    pathToFileInDisk = pathFile
-    with open(pathToFileInDisk, 'rb') as f:
-        data = f.read()
+#def sendDataLocal(pathFile):
+#    pathToFileInDisk = pathFile
+#    with open(pathToFileInDisk, 'rb') as f:
+#        data = f.read()
 
         # Draw a rectangle around the faces
         # for (x, y, w, h) in faces:
@@ -105,22 +120,22 @@ def sendDataLocal(pathFile):
 
         # Face detection parameters
 
-    params = {'returnFaceAttributes': 'age,gender,smile,facialHair,glasses',
-              'returnFaceLandmarks': 'false'}
+#    params = {'returnFaceAttributes': 'age,gender,smile,facialHair,glasses',
+#              'returnFaceLandmarks': 'false'}
 
-    headers = dict()
-    headers['Ocp-Apim-Subscription-Key'] = _key
-    headers['Content-Type'] = 'application/octet-stream'
+#    headers = dict()
+#    headers['Ocp-Apim-Subscription-Key'] = _key
+#    headers['Content-Type'] = 'application/octet-stream'
 
-    json = None
+#    json = None
 
-    result = processRequest(json, data, headers, params)
+#    result = processRequest(json, data, headers, params)
 
     # Display the resulting frame
     # cv2.imshow('Video', frame)
     
 
-    return result;
+ #   return result;
 
 def sendStringImage(data):
 
@@ -196,7 +211,7 @@ def newest_file_in_tree(rootfolder, extension=".jpg"):
 def processImage():
    # [image, imageString] = url_to_image('http://admin:agua@192.168.1.108/cgi-bin/snapshot.cgi?1')
 
-    pathToFileInDisk = '/Users/sergiogalan/temporalborrar/snapshot2.jpg'
+    
     with open( pathToFileInDisk, 'rb' ) as f:
         diskImage = f.read()
     # print ("face detectd")
