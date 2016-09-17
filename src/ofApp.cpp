@@ -172,7 +172,7 @@ void ofApp::update()
         }
     }
     oscRcvUpdate();
-    if(status!=SHOOTING){
+    if(status!=SHOOTING ) {
         updateServoPosition();
     }
     manalytics.update();
@@ -446,7 +446,7 @@ void ofApp::saveFrameAndNotify(){
 
 void ofApp::updateServoPosition(){
     //No quiero estar moviendo todo el rato....
-    if(ofGetElapsedTimeMillis()-timeLastMotorRotation>400 && finder.size()>0){
+    if(ofGetElapsedTimeMillis()-timeLastMotorRotation>100 && finder.size()>0){
         int p1=finder.getObject(0).position.x +finder.getObject(0).width/2;
         int resolucion = videoWidth;
 

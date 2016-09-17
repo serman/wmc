@@ -26,7 +26,7 @@ public:
         if(ofGetElapsedTimeMillis()>(timePeriodInit+period)){
             faceDetectionsTotal+=faceDetectionsPeriod;
             faceShotTotal += faceShotPeriod;
-            getString();
+            ofLogNotice() << getString() << endl;
             timePeriodInit=ofGetElapsedTimeMillis();
             
         }
