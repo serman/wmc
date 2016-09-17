@@ -54,7 +54,7 @@
 #endif
 
 
-#include "ofxNcurses.h"
+//#include "ofxNcurses.h"
 #include "analytics.h"
 
 enum SCREENMODES { NCURSESMODE,HEADLESS,GRAPHIC};

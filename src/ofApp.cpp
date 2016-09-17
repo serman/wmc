@@ -83,9 +83,9 @@ void ofApp::setup()
         serial.setup(msettings.serialPort, 9600);
     }
     
-    if(msettings.HEADLESS == SCREENMODES::NCURSESMODE){
+    /*if(msettings.HEADLESS == SCREENMODES::NCURSESMODE){
         setupNC();
-    }
+    }*/
 }
 
 
@@ -233,9 +233,9 @@ void ofApp::draw(){
         ofDrawBitmapString(infoStream.str(), 10, 10+12);
         drawDetection();
     }
-    else if(msettings.HEADLESS==SCREENMODES::NCURSESMODE){
-        drawNC(infoStream);
-    }
+    //else if(msettings.HEADLESS==SCREENMODES::NCURSESMODE){
+    //    drawNC(infoStream);
+    //}
     
     else if(msettings.HEADLESS==SCREENMODES::HEADLESS && ( (ofGetFrameNum() % (msettings.maxFrameRate*100)) ==0  )
             ){
