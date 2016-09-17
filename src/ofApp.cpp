@@ -40,7 +40,7 @@ void ofApp::setup()
         }
         
         faceTrackingGrabber=0;
-        microsoftGrabber=1;
+        microsoftGrabber=0;
         ratioW=1280.0/videoWidth;
         ratioH=1024.0/videoHeight;
         
@@ -402,7 +402,7 @@ void ofApp::saveFrameAndNotify(){
     //string fileName = "/Users/sergiogalan/temporalborrar/snapshot.png";
     if(msettings.useLocalVideo==false){ //si usamos la camara
 
-        grabbers[microsoftGrabber]->update();
+        //grabbers[microsoftGrabber]->update();
         grabFrameEnvio.setFromPixels(
                                      grabbers[microsoftGrabber]->getPixels(),
                                      grabbers[microsoftGrabber]->getWidth(),

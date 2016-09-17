@@ -204,7 +204,7 @@ public:
     ofImage grabFrameDetectBody;
 
     int faceTrackingGrabber=0;
-    int microsoftGrabber=1;
+    int microsoftGrabber=0;
     
     
     void keyPressed(int key);
@@ -227,8 +227,8 @@ public:
     //solo en el caso de usar videograbber
     ofVideoPlayer 		videoPlayer;
     bool                frameByframe;
-    int videoWidth = 704;
-    int videoHeight = 576;
+    int videoWidth = 1280;
+    int videoHeight = 1024;
     float ratioW=1;
     float ratioH=1;
 

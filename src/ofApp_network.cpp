@@ -43,8 +43,7 @@ void ofApp::oscRcvUpdate(){
                   );
             detections.push_back(d);
             ofLogVerbose()<< ofGetTimestampString("%d-%H %M:%S ")<< "data from Msoft: " << d.print() << endl;
-            timeLastDetectionFromAPI=ofGetElapsedTimeMillis()/1000;
-            
+            timeLastDetectionFromAPI=ofGetElapsedTimeMillis()/1000;            
         }
         status=FINDING;
         takeShootingDecision();
