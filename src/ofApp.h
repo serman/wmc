@@ -34,9 +34,9 @@
 
 
 
-#define MIN_TIME_API_QUERY 1000 
+#define MIN_TIME_API_QUERY 1000
 /* TIME_BETWEEN_DETECTIONS defines the minimun time betwen API QUERYS **/
-#define NETWORK_TIMEOUT 3000
+#define NETWORK_TIMEOUT 4000
 
 //#define NC
 

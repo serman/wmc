@@ -41,8 +41,10 @@ void ofApp::setup()
         
         faceTrackingGrabber=0;
         microsoftGrabber=0;
-        ratioW=1280.0/videoWidth;
-        ratioH=1024.0/videoHeight;
+     //   ratioW=1280.0/videoWidth;
+     //   ratioH=1024.0/videoHeight;
+        ratioW=1;
+        ratioH=1;
         
     }else{
         videoPlayer.load(msettings.videoName);
