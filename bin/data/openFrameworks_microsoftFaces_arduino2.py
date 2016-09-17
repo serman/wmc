@@ -12,6 +12,13 @@ import urllib
 #osc
 import OSC
 import threading
+import logging
+logger = logging.getLogger('wmc_py')
+hdlr = logging.FileHandler('wmc_py.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.INFO)
 
 #aperturaCamara = 15 # La camara con el zoom a tope va de -15 a 15
 #resolucion = 1280.0
@@ -60,6 +67,7 @@ def sendDataOSC(result):
         atLeastOne=True
         faceRectangle = currFace['faceRectangle']
         print(str(currFace['faceAttributes']))
+        logger.info(str(currFace['faceAttributes']))
         msg.setAddress("/face")
         #int x, int y, int w, int h, int _beard, int _age, int _glasses, int _gender, int _smile
         msg.append([faceRectangle['left'], faceRectangle['top'], faceRectangle['width'],  faceRectangle['height'] ]) 
@@ -81,11 +89,16 @@ def sendDataOSC(result):
         if(currFace['faceAttributes']['age']>25 and currFace['faceAttributes']['age']< 50):
             if(currFace['faceAttributes']['facialHair']['beard']>0.5):
                 mustUpload=True
-
-    client.send(msg)
+    
     print("sent OSC Data " + str(msg))
+    logger.info("sent OSC Data " + str(msg))
     if(atLeastOne==False):
         print("NO FACE" )
+        logger.info("NO FACE " )
+        msg.setAddress("/face")
+        client.send(msg)
+    else:
+        client.send(msg)
     if(mustUpload):
         r = requests.post('http://server.eclectico.net/upload.php', files={'file': open(pathToFileInDisk, 'rb')})
         #print (r.text)
@@ -100,6 +113,7 @@ def rcvMessage(addr, tags, stuff, source):
       sys.stdout.write("OSCServer Got: '%s' from %s\n" % (msg_string, source))
       #comprobar que el video que llega es el suyo
       print ("received ed of video")
+      logger.info("received ed of video")
       #print (str(stuff))
       processImage();
       #actualizar videos
