@@ -56,7 +56,7 @@ void ofApp::oscRcvUpdate(){
 void ofApp::takeShootingDecision(){
     //detections
     for(std::size_t i = 0; i < detections.size(); i++){
-       if(detections[i].age>25 && detections[i].age<50 && detections[i].beard>50 && detections[i].gender==0 )
+       if(detections[i].age>25 && detections[i].age<50 && detections[i].beard>39 && detections[i].gender==0 )
            killThatOne();
             ofLogNotice()<< ofGetTimestampString("%d-%H %M:%S ")<< "BANG!!!" << detections[i].print() << endl;
     }
