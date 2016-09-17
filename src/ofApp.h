@@ -184,9 +184,9 @@ public:
     //std::stringstream infoStream;
     
 /***** NCURSES CODE ***/
-    void setupNC();
-    void updateNC();
-    void drawNC(stringstream &stream1);
+    //void setupNC();
+    //void updateNC();
+    //void drawNC(stringstream &stream1);
 /*******/
 
     ofxOscSender sender;
