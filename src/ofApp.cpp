@@ -417,7 +417,9 @@ void ofApp::saveFrameAndNotify(){
 //cout << grabbers[microsoftGrabber]->getWidth() << " " << grabbers[microsoftGrabber]->getHeight()  << " " << ratioW  << " " << ratioH;
         
         //TODO testear que esto fncione
-        grabFrameEnvio.crop(facesRectangle.x*ratioW, facesRectangle.y*ratioH, facesRectangle.width*ratioW, facesRectangle.height*ratioH);
+        int y=facesRectangle.y-30;
+        if(y<0) y=0;
+        grabFrameEnvio.crop(facesRectangle.x*ratioW, y*ratioH, facesRectangle.width*ratioW, facesRectangle.height*ratioH);
         
         grabFrameEnvio.save(msettings.fileName);
         
