@@ -8,7 +8,7 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
-    //ofLogToFile(ofToDataPath("log.txt",true) );
+    ofLogToFile(ofToDataPath("log.txt",true) );
     ofSetLogLevel(OF_LOG_VERBOSE);
 
 

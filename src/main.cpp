@@ -1,6 +1,5 @@
 //#include "ofMain.h"
 #include "ofApp.h"
-//#define NCURSES
 
 #define NOWINDOW
 
@@ -14,10 +13,10 @@
 
 int main()
 {
-#ifdef NC
-    ofAppConsoleCurses window;
-    ofSetupOpenGL(&window,1280,720,OF_WINDOW);
-#elseif NOWINDOW
+//#ifdef NC
+//    ofAppConsoleCurses window;
+//    ofSetupOpenGL(&window,1280,720,OF_WINDOW);
+#ifdef NOWINDOW
     ofAppNoWindow w;
     ofSetupOpenGL(&w,1024,768, OF_WINDOW);
 #else
