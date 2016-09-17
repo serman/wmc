@@ -77,7 +77,7 @@ void ofApp::killThatOne(){
             
             int p1=targetMoved.x +targetMoved.width/2;
             int resolucion = videoWidth;
-            unsigned char angulo= ofMap(p1,0,resolucion,maxDeltaAngleServo,0);
+            unsigned char angulo= ofMap(p1,resolucion,0,maxDeltaAngleServo,0);
             if(angulo>=0 && angulo <= maxDeltaAngleServo){ //verificación redundante pero por si acaso
                 bangServoMsg[1]=angulo;
                 if(serial.isInitialized()){

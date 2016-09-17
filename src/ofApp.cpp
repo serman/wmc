@@ -453,7 +453,7 @@ void ofApp::updateServoPosition(){
   //        unsigned char angulo= (p1/resolucion) *2* aperturaCamara - aperturaCamara+90;
   //      int angulo2 = (p1/resolucion) *2* aperturaCamara - aperturaCamara+90;
         
-        unsigned char angulo= ofMap(p1/*ofGetMouseX()*/,0,resolucion,maxDeltaAngleServo,0);
+        unsigned char angulo= ofMap(p1/*ofGetMouseX()*/,resolucion,0,maxDeltaAngleServo,0);
         
         //ofLogNotice("angulo " + ofToString((int)angulo));
         if(angulo>=0 && angulo <= maxDeltaAngleServo){ //verificaci—n redundante pero por si acaso
