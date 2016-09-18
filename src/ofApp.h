@@ -34,7 +34,7 @@
 
 
 
-#define MIN_TIME_API_QUERY 1000
+#define MIN_TIME_API_QUERY 250
 /* TIME_BETWEEN_DETECTIONS defines the minimun time betwen API QUERYS **/
 #define NETWORK_TIMEOUT 4000
 
@@ -198,6 +198,7 @@ public:
     int timeLastDetectionFromAPI=0;
     int timeLastMotorRotation=0;
     int timeLastRestartCamera=0;
+    long timeTakeShootingPhoto=0;
     
     ofxCv::ObjectFinder finder;
     ofxCv::ObjectFinder faceFinder;
@@ -272,7 +273,7 @@ private:
     const int maxDeltaAngleServo = 60;
     settings msettings;
     void reConnectCamera();
-    void saveFrame();
+    void saveFrame(bool scale=true);
     
 };
 

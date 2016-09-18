@@ -40,7 +40,7 @@ void ofApp::oscRcvUpdate(){
                   m.getArgAsInt32(6),//glasses
                   m.getArgAsInt32(7),//gender
                   m.getArgAsInt32(8)//smile
-                  );
+            );
             detections.push_back(d);
             ofLogVerbose()<< ofGetTimestampString("%d-%H %M:%S ")<< "data from Msoft: " << d.print() << endl;
             timeLastDetectionFromAPI=ofGetElapsedTimeMillis()/1000;            

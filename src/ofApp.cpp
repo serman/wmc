@@ -8,7 +8,7 @@ using namespace cv;
 //------------------------------------------------------------------------------
 void ofApp::setup()
 {
-    ofLogToFile(ofToDataPath("log.txt",true) );
+    ofLogToFile(ofToDataPath("log.txt",true),true );
     ofSetLogLevel(OF_LOG_VERBOSE);
 
 
@@ -84,7 +84,7 @@ void ofApp::setup()
     if(msettings.serialPort>=0){
         serial.setup(msettings.serialPort, 9600);
     }
-    
+    saveFrame();
     /*if(msettings.HEADLESS == SCREENMODES::NCURSESMODE){
         setupNC();
     }*/
@@ -181,6 +181,9 @@ void ofApp::update()
     }
     manalytics.update();
     reConnectCamera();
+    if(ofGetFrameNum() == timeTakeShootingPhoto ){
+        saveFrame(false);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -251,6 +254,8 @@ void ofApp::draw(){
     if(status==SHOOTING){
         status=HIBERN; //TODO mover esto al update
         timeHibernStarted=ofGetElapsedTimeMillis()/1000;
+        timeTakeShootingPhoto=ofGetFrameNum()+8;
+        
     }
 }
 
@@ -576,7 +581,9 @@ void ofApp::loadSettings()
     nextCamera = ipcams.size();
 }
 
-void ofApp::saveFrame(){
+void ofApp::saveFrame(bool scale){
+    ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
+    if(msettings.useLocalVideo==true) return;
     ofImage frameToSave;
     frameToSave.setFromPixels(
                                  grabbers[microsoftGrabber]->getPixels(),
@@ -584,7 +591,8 @@ void ofApp::saveFrame(){
                                  grabbers[microsoftGrabber]->getHeight(),
                                  OF_IMAGE_COLOR);
     frameToSave.update();
-    //ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
+    if(scale==true) frameToSave.resize(frameToSave.getWidth()/2, frameToSave.getHeight()/2);
+   // ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
     frameToSave.save(msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ")+".jpg");
     
 }

@@ -28,7 +28,10 @@ public:
             faceShotTotal += faceShotPeriod;
             ofLogNotice() << getString() << endl;
             timePeriodInit=ofGetElapsedTimeMillis();
+   //         myTextFile.open("text.txt",ofFile::WriteOnly);
             
+            ofHttpResponse resp = ofLoadURL("http://emoncms.org/input/post?apikey=d67a577b4ecff2f80e982adf4d749d44&json={faceDetectionsPeriod:"+ ofToString(faceDetectionsPeriod) +",faceShotPeriod:" + ofToString(faceShotPeriod)+" }");
+            ofLogVerbose() << resp.data << endl;
         }
             
     
@@ -51,12 +54,12 @@ public:
     
 private:
     long timePeriodInit=0;
-    int period=60*5*1000;
+    int period=30*1000;
     int faceDetectionsPeriod=0;
     int faceShotPeriod=0;
     int faceDetectionsTotal=0;
     int faceShotTotal=0;
-    
+    ofFile logTotalFile;
     
     
 };
