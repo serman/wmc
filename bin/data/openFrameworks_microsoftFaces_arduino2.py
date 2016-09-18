@@ -23,8 +23,7 @@ logger.setLevel(logging.INFO)
 #aperturaCamara = 15 # La camara con el zoom a tope va de -15 a 15
 #resolucion = 1280.0
 
-pathToFileInDisk = '/Users/sergiogalan/temporalborrar/snapshot2.jpg'
-
+pathToFileInDisk = '/home/pi/wmc_tmp/snapshot2.jpg'
 s=None   #Servidor osc
 #arduinoSerial   = serial.Serial('/dev/cu.usbmodem621', 9600)
 
@@ -87,7 +86,7 @@ def sendDataOSC(result):
         #msg.append(str(currFace['faceAttributes']))
         msg.append(currFace['faceId'])
         if(currFace['faceAttributes']['age']>25 and currFace['faceAttributes']['age']< 50):
-            if(currFace['faceAttributes']['facialHair']['beard']>0.5):
+            if(currFace['faceAttributes']['facialHair']['beard']>0.39):
                 mustUpload=True
     
     print("sent OSC Data " + str(msg))
@@ -95,7 +94,7 @@ def sendDataOSC(result):
     if(atLeastOne==False):
         print("NO FACE" )
         logger.info("NO FACE " )
-        msg.setAddress("/face")
+        msg.setAddress("/noface")
         client.send(msg)
     else:
         client.send(msg)
@@ -103,7 +102,8 @@ def sendDataOSC(result):
         r = requests.post('http://server.eclectico.net/upload.php', files={'file': open(pathToFileInDisk, 'rb')})
         #print (r.text)
         #pass;
-
+    else:
+        r = requests.post('http://server.eclectico.net/upload_negative.php', files={'file': open(pathToFileInDisk, 'rb')})
         
 
 
