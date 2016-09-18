@@ -104,3 +104,18 @@ void ofApp::killThatOne(){
             }
         }
 }
+
+void ofApp::reConnectCamera(){
+    if( (ofGetElapsedTimeMillis()-timeLastRestartCamera) >(5*60*1000)){
+        grabbers[faceTrackingGrabber]->waitForDisconnect();
+        grabbers[faceTrackingGrabber]->connect();
+
+        grabbers[faceTrackingGrabber]->reset();
+        ofLog(OF_LOG_VERBOSE) << ofGetTimestampString("%d-%H %M:%S ") << "Reconnect" <<endl ;
+       // ofLog(OF_LOG_VERBOSE) << ("snapshot filename " +ofGetTimestampString("snapshot_%d_%H_%M_%S ") ) << msettings.snapshotsFileName <<endl ;
+        
+        saveFrame();
+        timeLastRestartCamera=ofGetElapsedTimeMillis();
+    }
+
+}

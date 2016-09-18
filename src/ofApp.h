@@ -44,11 +44,11 @@
 
 
 #if defined(TARGET_OF_IPHONE) || defined(TARGET_ANDROID) || defined(TARGET_LINUX_ARM)
-    #define NUM_CAMERAS 2
+    #define NUM_CAMERAS 1
     #define NUM_ROWS 1
     #define NUM_COLS 1
 #else
-    #define NUM_CAMERAS 2
+    #define NUM_CAMERAS 1
     #define NUM_ROWS 1
     #define NUM_COLS 1
 #endif
@@ -70,6 +70,7 @@ class settings{
         std::string OSChost="localhost";
         int OSCport=12345;
         int maxFrameRate;
+        std::string snapshotsFileName;
     
     
 };
@@ -196,6 +197,7 @@ public:
     int timeHibernStarted=0;
     int timeLastDetectionFromAPI=0;
     int timeLastMotorRotation=0;
+    int timeLastRestartCamera=0;
     
     ofxCv::ObjectFinder finder;
     ofxCv::ObjectFinder faceFinder;
@@ -269,6 +271,8 @@ private:
     const int aperturaCamara = 15;
     const int maxDeltaAngleServo = 60;
     settings msettings;
+    void reConnectCamera();
+    void saveFrame();
     
 };
 

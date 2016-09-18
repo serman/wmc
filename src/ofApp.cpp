@@ -18,6 +18,7 @@ void ofApp::setup()
     ofLogNotice() << ofGetTimestampString("%d-%H %M:%S ") << "STARTING";
     
     ofSetLogLevel(msettings.logLevel);
+    ofSetLogLevel("ofSerial", OF_LOG_NOTICE);
     int serverRecvPort = 12000;
     string dst="localhost";
     myosc.setup(serverRecvPort);
@@ -64,6 +65,7 @@ void ofApp::setup()
     ofSetVerticalSync(true);
     finder.setup("haarcascade_upperbody.xml");
     finder.setPreset(ObjectFinder::Fast); //accurate sensitive fast //este lo deamos en fast
+    //finder.setRescale(0.20);
                 //info de los presets: https://github.com/kylemcdonald/ofxCv/blob/master/libs/ofxCv/src/ObjectFinder.cpp
     finder.getTracker().setSmoothingRate(.2);
     faceFinder.setup("haarcascade_frontalface_alt2.xml");
@@ -112,7 +114,7 @@ void ofApp::videoResized(const void* sender, ofResizeEventArgs& arg)
 void ofApp::update()
 {
     
-    if(status==HIBERN &&  ( (ofGetElapsedTimeMillis()/1000) - timeHibernStarted > 5 ) ){
+    if(status==HIBERN &&  ( (ofGetElapsedTimeMillis()/1000) - timeHibernStarted > 3 ) ){
         status=FINDING;
     }
     if(status==WAITING_RESPONSE){ //checking for a network timeout
@@ -178,6 +180,7 @@ void ofApp::update()
         updateServoPosition();
     }
     manalytics.update();
+    reConnectCamera();
 }
 
 //------------------------------------------------------------------------------
@@ -556,6 +559,7 @@ void ofApp::loadSettings()
         msettings.videoName= XML.getValue("videoName","abierto.mp4");
         msettings.serialPort= XML.getValue("serialPort",-1);
         msettings.HEADLESS= XML.getValue("headless",1);
+        msettings.snapshotsFileName=XML.getValue("snapshots","/home/pi/snapshots/");
 
         msettings.logLevel= static_cast<ofLogLevel>( XML.getValue("logLevel",1));
         msettings.maxFrameRate= XML.getValue("maxFrameRate",25);
@@ -570,4 +574,17 @@ void ofApp::loadSettings()
     ofLog(OF_LOG_VERBOSE, "-----------Loading Streams Complete----------");
     
     nextCamera = ipcams.size();
+}
+
+void ofApp::saveFrame(){
+    ofImage frameToSave;
+    frameToSave.setFromPixels(
+                                 grabbers[microsoftGrabber]->getPixels(),
+                                 grabbers[microsoftGrabber]->getWidth(),
+                                 grabbers[microsoftGrabber]->getHeight(),
+                                 OF_IMAGE_COLOR);
+    frameToSave.update();
+    //ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
+    frameToSave.save(msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ")+".jpg");
+    
 }
