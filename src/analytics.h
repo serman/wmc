@@ -54,7 +54,7 @@ public:
     
 private:
     long timePeriodInit=0;
-    int period=30*1000;
+    int period=5*60*1000 - 8000;
     int faceDetectionsPeriod=0;
     int faceShotPeriod=0;
     int faceDetectionsTotal=0;

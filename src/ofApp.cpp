@@ -84,7 +84,7 @@ void ofApp::setup()
     if(msettings.serialPort>=0){
         serial.setup(msettings.serialPort, 9600);
     }
-    saveFrame();
+    //saveFrame();
     /*if(msettings.HEADLESS == SCREENMODES::NCURSESMODE){
         setupNC();
     }*/
