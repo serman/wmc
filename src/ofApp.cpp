@@ -67,7 +67,7 @@ void ofApp::setup()
     finder.setPreset(ObjectFinder::Fast); //accurate sensitive fast //este lo deamos en fast
     //finder.setRescale(0.20);
                 //info de los presets: https://github.com/kylemcdonald/ofxCv/blob/master/libs/ofxCv/src/ObjectFinder.cpp
-    finder.getTracker().setSmoothingRate(.2);
+    //finder.getTracker().setSmoothingRate(.2);
     faceFinder.setup("haarcascade_frontalface_alt2.xml");
     faceFinder.setPreset(ObjectFinder::Sensitive);
     
@@ -142,8 +142,13 @@ void ofApp::update()
     }
     /*****  *****/
        
+    bool newFrame=false;
+    if(msettings.useLocalVideo==false)
+        newFrame=grabbers[faceTrackingGrabber]->isFrameNew();
+    else
+        newFrame=videoPlayer.isFrameNew();
     
-    if(grabberMat.rows >100 && ( status==FINDING || status==WAITING_RESPONSE ) ){
+    if(grabberMat.rows >10 && ( status==FINDING || status==WAITING_RESPONSE ) && newFrame ){
         finder.update( grabberMat );
         int detectedFaces=0;
         if(finder.size()>0 && status==FINDING ){ //Si est‡ en modo busqueda y ha encontrado algo...
@@ -154,7 +159,7 @@ void ofApp::update()
                 faceFinder.update(imgMat2);
                 if(faceFinder.size()>0){
                     lastFaceTrackingIdSent=finder.getTracker().getLabelFromIndex(i);
-                    detectedFaces++;
+                    detectedFaces+=faceFinder.size();
                     break;
                 }
             }
@@ -397,7 +402,11 @@ void ofApp::getContour(){
     //facesRectangle.set(0,0,0,0);
     for(int i=0; i<finder.size(); i++){
         if(i==0){
-            facesRectangle=finder.getObject(i);
+            facesRectangle=ofRectangle(finder.getObject(i).getX(),
+                                       finder.getObject(i).getY(),
+                                       finder.getObject(i).getWidth(),
+                                       finder.getObject(i).getHeight()
+                                       );
         }
         else{
             facesRectangle.growToInclude(finder.getObject(i));
@@ -411,7 +420,6 @@ void ofApp::saveFrameAndNotify(){
     
     //string fileName = "/Users/sergiogalan/temporalborrar/snapshot.png";
     if(msettings.useLocalVideo==false){ //si usamos la camara
-
         //grabbers[microsoftGrabber]->update();
         grabFrameEnvio.setFromPixels(
                                      grabbers[microsoftGrabber]->getPixels(),
@@ -426,8 +434,9 @@ void ofApp::saveFrameAndNotify(){
         
         //TODO testear que esto fncione
         int y=facesRectangle.y-30;
+        
         if(y<0) y=0;
-        grabFrameEnvio.crop(facesRectangle.x*ratioW, y*ratioH, facesRectangle.width*ratioW, facesRectangle.height*ratioH);
+        grabFrameEnvio.crop(facesRectangle.x, y, facesRectangle.width, facesRectangle.height);
         
         grabFrameEnvio.save(msettings.fileName);
         
@@ -582,7 +591,7 @@ void ofApp::loadSettings()
 }
 
 void ofApp::saveFrame(bool scale){
-    ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
+    ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S") +".jpg");
     if(msettings.useLocalVideo==true) return;
     ofImage frameToSave;
     frameToSave.setFromPixels(
@@ -593,6 +602,6 @@ void ofApp::saveFrame(bool scale){
     frameToSave.update();
     if(scale==true) frameToSave.resize(frameToSave.getWidth()/2, frameToSave.getHeight()/2);
    // ofLogNotice()<< "filename snap" << (msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ") +".jpg");
-    frameToSave.save(msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S ")+".jpg");
+    frameToSave.save(msettings.snapshotsFileName+ofGetTimestampString("snapshot_%d_%H_%M_%S")+".jpg");
     
 }
